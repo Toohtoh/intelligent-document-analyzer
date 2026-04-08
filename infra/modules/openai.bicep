@@ -9,7 +9,7 @@ resource openAI 'Microsoft.CognitiveServices/accounts@2023-10-01-preview' = {
   location: location
   kind: 'OpenAI'
   sku: {
-    name: 'S0' // Pay-as-you-go
+    name: 'S0'
   }
   properties: {
     publicNetworkAccess: 'Enabled'
@@ -27,7 +27,7 @@ resource gpt4oDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-
   name: 'gpt-4o'
   sku: {
     name: 'Standard'
-    capacity: 10 // TPM limité — protection budget étudiant
+    capacity: 1
   }
   properties: {
     model: {
