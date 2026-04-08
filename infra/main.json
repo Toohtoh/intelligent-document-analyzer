@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.42.1.51946",
-      "templateHash": "9396758376404138454"
+      "templateHash": "5499417586127815309"
     }
   },
   "parameters": {
@@ -45,7 +45,9 @@
     "appServiceName": "[format('app-{0}-{1}', parameters('projectName'), parameters('suffix'))]",
     "cosmosAccountName": "[format('cosmos-{0}-{1}', parameters('projectName'), parameters('suffix'))]",
     "logAnalyticsName": "[format('log-{0}-{1}', parameters('projectName'), parameters('suffix'))]",
-    "appInsightsName": "[format('appi-{0}-{1}', parameters('projectName'), parameters('suffix'))]"
+    "appInsightsName": "[format('appi-{0}-{1}', parameters('projectName'), parameters('suffix'))]",
+    "documentIntelligenceName": "[format('di-{0}-{1}', parameters('projectName'), parameters('suffix'))]",
+    "openAIName": "[format('oai-{0}-{1}', parameters('projectName'), parameters('suffix'))]"
   },
   "resources": [
     {
@@ -755,6 +757,186 @@
           }
         }
       }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "documentIntelligenceDeploy",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "documentIntelligenceName": {
+            "value": "[variables('documentIntelligenceName')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.42.1.51946",
+              "templateHash": "11161757606884820477"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for all resources"
+              }
+            },
+            "documentIntelligenceName": {
+              "type": "string",
+              "metadata": {
+                "description": "Document Intelligence account name"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.CognitiveServices/accounts",
+              "apiVersion": "2023-10-01-preview",
+              "name": "[parameters('documentIntelligenceName')]",
+              "location": "[parameters('location')]",
+              "kind": "FormRecognizer",
+              "sku": {
+                "name": "F0"
+              },
+              "properties": {
+                "publicNetworkAccess": "Enabled",
+                "networkAcls": {
+                  "defaultAction": "Allow"
+                },
+                "customSubDomainName": "[parameters('documentIntelligenceName')]",
+                "disableLocalAuth": false
+              }
+            }
+          ],
+          "outputs": {
+            "documentIntelligenceName": {
+              "type": "string",
+              "value": "[parameters('documentIntelligenceName')]"
+            },
+            "documentIntelligenceEndpoint": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('documentIntelligenceName')), '2023-10-01-preview').endpoint]"
+            },
+            "documentIntelligenceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('documentIntelligenceName'))]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "openAIDeploy",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "openAIName": {
+            "value": "[variables('openAIName')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.42.1.51946",
+              "templateHash": "2607758965534024297"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for all resources"
+              }
+            },
+            "openAIName": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure OpenAI account name"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.CognitiveServices/accounts",
+              "apiVersion": "2023-10-01-preview",
+              "name": "[parameters('openAIName')]",
+              "location": "[parameters('location')]",
+              "kind": "OpenAI",
+              "sku": {
+                "name": "S0"
+              },
+              "properties": {
+                "publicNetworkAccess": "Enabled",
+                "networkAcls": {
+                  "defaultAction": "Allow"
+                },
+                "customSubDomainName": "[parameters('openAIName')]",
+                "disableLocalAuth": false
+              }
+            },
+            {
+              "type": "Microsoft.CognitiveServices/accounts/deployments",
+              "apiVersion": "2023-10-01-preview",
+              "name": "[format('{0}/{1}', parameters('openAIName'), 'gpt-4o')]",
+              "sku": {
+                "name": "Standard",
+                "capacity": 10
+              },
+              "properties": {
+                "model": {
+                  "format": "OpenAI",
+                  "name": "gpt-4o",
+                  "version": "2024-11-20"
+                },
+                "versionUpgradeOption": "OnceCurrentVersionExpired"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts', parameters('openAIName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "openAIName": {
+              "type": "string",
+              "value": "[parameters('openAIName')]"
+            },
+            "openAIEndpoint": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAIName')), '2023-10-01-preview').endpoint]"
+            },
+            "openAIId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('openAIName'))]"
+            },
+            "gpt4oDeploymentName": {
+              "type": "string",
+              "value": "gpt-4o"
+            }
+          }
+        }
+      }
     }
   ],
   "outputs": {
@@ -813,6 +995,18 @@
     "appInsightsConnectionString": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Resources/deployments', 'monitoringDeploy'), '2025-04-01').outputs.connectionString.value]"
+    },
+    "documentIntelligenceEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'documentIntelligenceDeploy'), '2025-04-01').outputs.documentIntelligenceEndpoint.value]"
+    },
+    "openAIEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'openAIDeploy'), '2025-04-01').outputs.openAIEndpoint.value]"
+    },
+    "gpt4oDeploymentName": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'openAIDeploy'), '2025-04-01').outputs.gpt4oDeploymentName.value]"
     }
   }
 }

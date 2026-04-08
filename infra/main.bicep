@@ -1,5 +1,5 @@
 @description('Location for all resources')
-param location string = 'norwayeast'
+param location string = 'swedencentral'
 
 @description('Unique suffix for resource names')
 param suffix string
@@ -19,6 +19,8 @@ var appServiceName = 'app-${projectName}-${suffix}'
 var cosmosAccountName = 'cosmos-${projectName}-${suffix}'
 var logAnalyticsName = 'log-${projectName}-${suffix}'
 var appInsightsName = 'appi-${projectName}-${suffix}'
+var documentIntelligenceName = 'di-${projectName}-${suffix}'
+var openAIName = 'oai-${projectName}-${suffix}'
 
 // ===== MODULES =====
 
@@ -74,6 +76,22 @@ module monitoring 'modules/monitoring.bicep' = {
   }
 }
 
+module documentIntelligence 'modules/documentintelligence.bicep' = {
+  name: 'documentIntelligenceDeploy'
+  params: {
+    location: location
+    documentIntelligenceName: documentIntelligenceName
+  }
+}
+
+module openAI 'modules/openai.bicep' = {
+  name: 'openAIDeploy'
+  params: {
+    location: location
+    openAIName: openAIName
+  }
+}
+
 // ===== OUTPUTS =====
 output keyVaultName string = keyVault.outputs.keyVaultName
 output keyVaultUri string = keyVault.outputs.keyVaultUri
@@ -89,3 +107,6 @@ output databaseName string = cosmosDb.outputs.databaseName
 output appInsightsName string = monitoring.outputs.appInsightsName
 output instrumentationKey string = monitoring.outputs.instrumentationKey
 output appInsightsConnectionString string = monitoring.outputs.connectionString
+output documentIntelligenceEndpoint string = documentIntelligence.outputs.documentIntelligenceEndpoint
+output openAIEndpoint string = openAI.outputs.openAIEndpoint
+output gpt4oDeploymentName string = openAI.outputs.gpt4oDeploymentName
