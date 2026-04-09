@@ -1,5 +1,5 @@
 @description('Location for all resources')
-param location string = 'swedencentral'
+param location string = 'switzerlandnorth'
 
 @description('Unique suffix for resource names')
 param suffix string
@@ -10,7 +10,7 @@ param projectName string = 'docanalyzer'
 @description('Principal ID for role assignments')
 param principalId string = ''
 
-// ===== VARIABLES — NOMMAGE =====
+// ===== VARIABLES =====
 var keyVaultName = 'kv-${projectName}-${suffix}'
 var storageAccountName = 'st${projectName}${suffix}'
 var acrName = 'acr${projectName}${suffix}'
@@ -84,6 +84,14 @@ module documentIntelligence 'modules/documentintelligence.bicep' = {
   }
 }
 
+module openAI 'modules/openai.bicep' = {
+  name: 'openAIDeploy'
+  params: {
+    location: location
+    openAIName: openAIName
+  }
+}
+
 // ===== OUTPUTS =====
 output keyVaultName string = keyVault.outputs.keyVaultName
 output keyVaultUri string = keyVault.outputs.keyVaultUri
@@ -100,3 +108,5 @@ output appInsightsName string = monitoring.outputs.appInsightsName
 output instrumentationKey string = monitoring.outputs.instrumentationKey
 output appInsightsConnectionString string = monitoring.outputs.connectionString
 output documentIntelligenceEndpoint string = documentIntelligence.outputs.documentIntelligenceEndpoint
+output openAIEndpoint string = openAI.outputs.openAIEndpoint
+output gpt4oDeploymentName string = openAI.outputs.gpt4oDeploymentName
