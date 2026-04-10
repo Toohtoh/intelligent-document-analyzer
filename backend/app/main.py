@@ -1,32 +1,32 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.config import get_settings
+from app.routers import health, documents
+
+settings = get_settings()
 
 app = FastAPI(
-    title="Intelligent Document Analyzer API",
-    description="API d'analyse de documents intelligente sur Azure",
-    version="1.0.0"
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION,
+    description="API for intelligent document analysis using Azure AI services",
 )
 
-# CORS — sera restreint en production (Semaine 3)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Will be restricted in Week 3
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+app.include_router(health.router, tags=["Health"])
+app.include_router(documents.router, prefix="/api/v1", tags=["Documents"])
+
 @app.get("/")
 async def root():
     return {
-        "message": "Intelligent Document Analyzer API",
-        "version": "1.0.0",
-        "status": "running"
-    }
-
-@app.get("/health")
-async def health():
-    return {
-        "status": "healthy",
-        "service": "document-analyzer-api"
+        "app": settings.APP_NAME,
+        "version": settings.APP_VERSION,
+        "environment": settings.ENVIRONMENT,
+        "docs": "/docs",
     }
