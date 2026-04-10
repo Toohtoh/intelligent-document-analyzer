@@ -1,15 +1,96 @@
-# Pipeline CI/CD — sera complété en Semaine 1 Jour 6
-name: Deploy
+name: CI/CD — Build, Scan, Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  ACR_LOGIN_SERVER: acrdocanalyzer25eb89.azurecr.io
+  IMAGE_NAME: docanalyzer-backend
+  APP_SERVICE_NAME: app-docanalyzer-25eb89
+  RESOURCE_GROUP: rg-document-analyzer-dev
 
 jobs:
-  placeholder:
+  build-scan-push:
+    name: 🐳 Build, Scan & Push
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Placeholder
-        run: echo "Pipeline will be configured on Day 6"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to ACR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} \
+            -t $ACR_LOGIN_SERVER/$IMAGE_NAME:latest \
+            ./backend
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          format: table
+          exit-code: 0
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+      - name: Push image to ACR
+        run: |
+          docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
+          docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:latest
+
+  deploy:
+    name: 🚀 Deploy to App Service
+    runs-on: ubuntu-latest
+    needs: build-scan-push
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Log in to Azure CLI
+        uses: azure/login@v2
+        with:
+          creds: '{"clientId":"${{ secrets.ACR_USERNAME }}","clientSecret":"${{ secrets.ACR_PASSWORD }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":""}'
+
+      - name: Deploy container to App Service
+        run: |
+          az webapp config container set \
+            --name $APP_SERVICE_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --container-image-name $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} \
+            --container-registry-url https://$ACR_LOGIN_SERVER \
+            --container-registry-user ${{ secrets.ACR_USERNAME }} \
+            --container-registry-password ${{ secrets.ACR_PASSWORD }}
+
+          az webapp restart \
+            --name $APP_SERVICE_NAME \
+            --resource-group $RESOURCE_GROUP
+
+  smoke-test:
+    name: ✅ Smoke Test
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    steps:
+      - name: Wait for App Service to be ready
+        run: sleep 40
+
+      - name: Health check
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            https://app-docanalyzer-25eb89.azurewebsites.net/health)
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Smoke test failed — /health returned $STATUS"
+            exit 1
+          fi
+          echo "✅ App is live and healthy"
