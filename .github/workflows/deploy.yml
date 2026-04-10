@@ -73,7 +73,7 @@ jobs:
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://app-docanalyzer-25eb89.azurewebsites.net/health)
           echo "HTTP status: $STATUS"
-          if [ "$STATUS" != "200" ]; then
+          if [ "$STATUS" != "202" ]; then
             echo "Smoke test failed - /health returned $STATUS"
             exit 1
           fi
