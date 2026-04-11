@@ -23,12 +23,18 @@ class BlobService:
             await self.client.get_account_information()
         return True
 
-    async def upload_document(self, file_bytes: bytes, filename: str) -> str:
+    async def upload_document(
+        self, file_bytes: bytes, filename: str, document_id: str = None
+    ) -> str:
         """
         Upload a document to the 'documents' container.
         Returns the blob name (used as document ID).
         """
-        blob_name = f"{uuid.uuid4()}/{filename}"
+        if document_id is None:
+            document_id = str(uuid.uuid4())
+
+        blob_name = f"{document_id}/{filename}"
+
         async with self.client:
             container_client = self.client.get_container_client(
                 settings.AZURE_STORAGE_CONTAINER_DOCUMENTS
