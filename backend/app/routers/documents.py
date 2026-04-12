@@ -2,6 +2,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from app.services.blob_service import BlobService
 from app.services.ocr_service import OCRService
 from app.services.ai_service import AIService
+from app.services.cosmos_service import CosmosService
 from app.models.document import DocumentResponse, DocumentStatus
 from datetime import datetime
 from pydantic import BaseModel
@@ -28,7 +29,6 @@ class QuestionRequest(BaseModel):
 
 
 def sanitize_filename(filename: str) -> str:
-    """Clean filename — replace spaces and special chars with underscores."""
     filename = filename.strip()
     filename = re.sub(r'[^\w\-_\.]', '_', filename)
     filename = re.sub(r'_+', '_', filename)
@@ -38,36 +38,22 @@ def sanitize_filename(filename: str) -> str:
 @router.post("/upload-and-analyze")
 async def upload_and_analyze(file: UploadFile = File(...)):
     """
-    Upload a document AND analyze it in one single call.
-    1. Validates the file
-    2. Uploads to Blob Storage
-    3. Runs OCR with Document Intelligence
-    4. Generates AI summary and extracts entities with GPT-4o
-    5. Returns full results
+    Upload + OCR + AI + Save to Cosmos DB — all in one call.
     """
-
-    # Validate file type
     if file.content_type not in ALLOWED_CONTENT_TYPES:
         raise HTTPException(
             status_code=400,
-            detail=f"File type '{file.content_type}' not allowed. "
-                   f"Allowed types: PDF, JPEG, PNG, TIFF, DOCX",
+            detail=f"File type '{file.content_type}' not allowed.",
         )
 
-    # Read file
     file_bytes = await file.read()
 
-    # Validate size
     if len(file_bytes) > MAX_FILE_SIZE:
-        raise HTTPException(
-            status_code=400,
-            detail=f"File too large. Maximum size is 10MB.",
-        )
+        raise HTTPException(status_code=400, detail="File too large. Maximum 10MB.")
 
     if len(file_bytes) == 0:
         raise HTTPException(status_code=400, detail="File is empty.")
 
-    # Clean filename
     clean_filename = sanitize_filename(file.filename)
     document_id = str(uuid.uuid4())
 
@@ -80,10 +66,7 @@ async def upload_and_analyze(file: UploadFile = File(...)):
             document_id=document_id,
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to upload file: {str(e)}",
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to upload file: {str(e)}")
 
     # Step 2 — Run OCR
     try:
@@ -93,12 +76,9 @@ async def upload_and_analyze(file: UploadFile = File(...)):
             content_type=file.content_type,
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"OCR analysis failed: {str(e)}",
-        )
+        raise HTTPException(status_code=500, detail=f"OCR failed: {str(e)}")
 
-    # Step 3 — Generate AI summary and extract entities
+    # Step 3 — Generate AI summary and entities
     ai_summary = None
     ai_entities = {}
     try:
@@ -106,17 +86,17 @@ async def upload_and_analyze(file: UploadFile = File(...)):
         ai_summary = await ai_service.generate_summary(ocr_result["full_text"])
         ai_entities = await ai_service.extract_entities(ocr_result["full_text"])
     except Exception as e:
-        # AI failure is non-blocking — we still return OCR results
         ai_summary = f"AI summary unavailable: {str(e)}"
 
-    return {
+    # Build result document
+    result = {
         "document_id": document_id,
         "filename": clean_filename,
         "original_filename": file.filename,
         "content_type": file.content_type,
         "size_bytes": len(file_bytes),
         "status": DocumentStatus.COMPLETED,
-        "uploaded_at": datetime.utcnow(),
+        "uploaded_at": datetime.utcnow().isoformat(),
         "blob_name": blob_name,
         "ocr_result": {
             "page_count": ocr_result["page_count"],
@@ -131,12 +111,65 @@ async def upload_and_analyze(file: UploadFile = File(...)):
         },
     }
 
+    # Step 4 — Save to Cosmos DB
+    try:
+        cosmos_service = CosmosService()
+        await cosmos_service.save_document(result.copy())
+    except Exception as e:
+        # Non-blocking — still return results even if save fails
+        result["cosmos_warning"] = f"Results not saved to DB: {str(e)}"
+
+    return result
+
+
+@router.get("/documents")
+async def list_documents(limit: int = 20):
+    """List all analyzed documents from Cosmos DB."""
+    try:
+        cosmos_service = CosmosService()
+        documents = await cosmos_service.list_documents(limit=limit)
+        return {
+            "count": len(documents),
+            "documents": documents,
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve documents: {str(e)}",
+        )
+
+
+@router.get("/documents/{document_id}")
+async def get_document(document_id: str):
+    """Get a single document with full analysis results."""
+    try:
+        cosmos_service = CosmosService()
+        document = await cosmos_service.get_document(document_id)
+        return document
+    except Exception as e:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Document not found: {str(e)}",
+        )
+
+
+@router.delete("/documents/{document_id}")
+async def delete_document(document_id: str):
+    """Delete a document from Cosmos DB."""
+    try:
+        cosmos_service = CosmosService()
+        await cosmos_service.delete_document(document_id)
+        return {"message": f"Document {document_id} deleted successfully."}
+    except Exception as e:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Document not found: {str(e)}",
+        )
+
 
 @router.post("/ask")
 async def ask_question(request: QuestionRequest):
-    """
-    Ask a question about a document's content.
-    """
+    """Ask a question about a document's content."""
     if not request.question or len(request.question.strip()) == 0:
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
@@ -150,10 +183,7 @@ async def ask_question(request: QuestionRequest):
             question=request.question,
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to answer question: {str(e)}",
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to answer: {str(e)}")
 
     return {
         "document_id": request.document_id,
@@ -181,16 +211,13 @@ async def upload_document(file: UploadFile = File(...)):
 
     try:
         blob_service = BlobService()
-        blob_name = await blob_service.upload_document(
+        await blob_service.upload_document(
             file_bytes=file_bytes,
             filename=clean_filename,
             document_id=document_id,
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to upload file: {str(e)}",
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to upload: {str(e)}")
 
     return DocumentResponse(
         id=document_id,
@@ -199,9 +226,3 @@ async def upload_document(file: UploadFile = File(...)):
         uploaded_at=datetime.utcnow(),
         message=f"File '{clean_filename}' uploaded successfully.",
     )
-
-
-@router.get("/documents")
-async def list_documents():
-    """Placeholder — will be implemented on Jour 11 with Cosmos DB."""
-    return {"documents": [], "message": "Coming soon — Jour 11"}
