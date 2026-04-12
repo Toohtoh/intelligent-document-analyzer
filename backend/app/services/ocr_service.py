@@ -28,7 +28,6 @@ class OCRService:
                 poller = await client.begin_analyze_document(
                     model_id="prebuilt-document",
                     document=file_bytes,
-                    content_type=content_type,
                 )
                 result = await poller.result()
 
