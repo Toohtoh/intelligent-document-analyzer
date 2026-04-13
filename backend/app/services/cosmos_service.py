@@ -53,31 +53,28 @@ class CosmosService:
                 query = (
                     f"SELECT c.id, c.document_id, c.filename, c.original_filename, "
                     f"c.content_type, c.size_bytes, c.status, c.uploaded_at, "
-                    f"c.saved_at FROM c WHERE c.userId = '{DEFAULT_USER_ID}' "
-                    f"ORDER BY c.saved_at DESC OFFSET 0 LIMIT {limit}"
+                    f"c.saved_at FROM c ORDER BY c.saved_at DESC OFFSET 0 LIMIT {limit}"
                 )
                 items = []
                 async for item in container.query_items(query=query):
                     items.append(item)
                 return items
 
-   async def delete_document(self, document_id: str) -> bool:
-    """Delete a document by ID."""
-    credential = ManagedIdentityCredential()
-    async with credential:
-        client = CosmosClient(url=self.endpoint, credential=credential)
-        async with client:
-            database = client.get_database_client(self.database_name)
-            container = database.get_container_client(self.container_name)
-
-            # Try with default-user first, then fallback to document_id
-            for partition_key in [DEFAULT_USER_ID, document_id, ""]:
-                try:
-                    await container.delete_item(
-                        item=document_id,
-                        partition_key=partition_key,
-                    )
-                    return True
-                except Exception:
-                    continue
-            raise Exception("Document not found with any partition key")
+    async def delete_document(self, document_id: str) -> bool:
+        """Delete a document by ID — tries multiple partition keys."""
+        credential = ManagedIdentityCredential()
+        async with credential:
+            client = CosmosClient(url=self.endpoint, credential=credential)
+            async with client:
+                database = client.get_database_client(self.database_name)
+                container = database.get_container_client(self.container_name)
+                for partition_key in [DEFAULT_USER_ID, document_id]:
+                    try:
+                        await container.delete_item(
+                            item=document_id,
+                            partition_key=partition_key,
+                        )
+                        return True
+                    except Exception:
+                        continue
+                raise Exception("Document not found with any partition key")
