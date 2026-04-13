@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Dark mode (default) */
+  --navy: #0A0F1E;
+  --navy-soft: #111827;
+  --navy-card: #161D2F;
+  --navy-border: #1E2A42;
+  --indigo: #6366F1;
+  --indigo-light: #818CF8;
+  --cyan: #06B6D4;
+  --cyan-light: #67E8F9;
+  --green: #10B981;
+  --amber: #F59E0B;
+  --rose: #F43F5E;
+  --purple: #A855F7;
+  --text-primary: #F8FAFC;
+  --text-soft: #CBD5E1;
+  --text-muted: #64748B;
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --bg-main: #0A0F1E;
+  --bg-soft: #111827;
+  --bg-card: #161D2F;
+  --bg-border: #1E2A42;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+/* Light mode */
+body.light {
+  --navy: #F1F5F9;
+  --navy-soft: #E2E8F0;
+  --navy-card: #FFFFFF;
+  --navy-border: #CBD5E1;
+  --text-primary: #0F172A;
+  --text-soft: #334155;
+  --text-muted: #64748B;
+  --bg-main: #F1F5F9;
+  --bg-soft: #E2E8F0;
+  --bg-card: #FFFFFF;
+  --bg-border: #CBD5E1;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--navy);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--navy); }
+::-webkit-scrollbar-thumb { background: var(--navy-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--indigo); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(99,102,241,0.4); }
+  70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(99,102,241,0); }
+  100% { transform: scale(0.95); }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-fadeUp { animation: fadeUp 0.6s ease forwards; }
+.animate-fadeUp-delay-1 { animation: fadeUp 0.6s ease 0.1s both; }
+.animate-fadeUp-delay-2 { animation: fadeUp 0.6s ease 0.2s both; }
+.animate-fadeUp-delay-3 { animation: fadeUp 0.6s ease 0.3s both; }
