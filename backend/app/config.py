@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     # Azure Key Vault
     AZURE_KEYVAULT_URI: str
 
+    # Auth0
+    AUTH0_DOMAIN: str = "intelligent-docanalyzer.eu.auth0.com"
+    AUTH0_AUDIENCE: str = "https://docanalyzer-api"
+
     class Config:
         env_file = ".env"
         case_sensitive = True

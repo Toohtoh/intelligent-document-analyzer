@@ -152,3 +152,42 @@ class AIService:
         )
 
         return response.choices[0].message.content.strip()
+        async def classify_document(self, text: str) -> str:
+    """
+    Classify the document type.
+    """
+    if not text or len(text.strip()) == 0:
+        return "unknown"
+
+    truncated_text = text[:4000] if len(text) > 4000 else text
+
+    client = await self._get_client()
+
+    response = await client.chat.completions.create(
+        model=self.deployment,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a document classification expert. "
+                    "Respond with exactly one word from this list only: "
+                    "invoice, contract, cv, report, id_document, letter, unknown. "
+                    "No explanation. No punctuation. Just the single word."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Classify this document into one of these types: "
+                    f"invoice, contract, cv, report, id_document, letter, unknown.\n\n"
+                    f"{truncated_text}"
+                ),
+            },
+        ],
+        max_tokens=10,
+        temperature=0.0,
+    )
+
+    result = response.choices[0].message.content.strip().lower()
+    valid = ["invoice", "contract", "cv", "report", "id_document", "letter", "unknown"]
+    return result if result in valid else "unknown"
