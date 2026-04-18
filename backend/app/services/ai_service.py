@@ -1,8 +1,6 @@
 from openai import AsyncAzureOpenAI
 from azure.identity.aio import ManagedIdentityCredential
-from azure.core.credentials import AccessToken
 from app.config import get_settings
-import time
 
 settings = get_settings()
 
@@ -13,13 +11,9 @@ class AIService:
         self.deployment = settings.AZURE_OPENAI_DEPLOYMENT
 
     async def _get_client(self):
-        """Create Azure OpenAI client with Managed Identity."""
         credential = ManagedIdentityCredential()
-        token = await credential.get_token(
-            "https://cognitiveservices.azure.com/.default"
-        )
+        token = await credential.get_token("https://cognitiveservices.azure.com/.default")
         await credential.close()
-
         client = AsyncAzureOpenAI(
             azure_endpoint=self.endpoint,
             azure_deployment=self.deployment,
@@ -29,17 +23,10 @@ class AIService:
         return client
 
     async def generate_summary(self, text: str) -> str:
-        """
-        Generate a concise summary of the document.
-        """
         if not text or len(text.strip()) == 0:
             return "No text content to summarize."
-
-        # Limit text to avoid token limits
         truncated_text = text[:8000] if len(text) > 8000 else text
-
         client = await self._get_client()
-
         response = await client.chat.completions.create(
             model=self.deployment,
             messages=[
@@ -63,21 +50,13 @@ class AIService:
             max_tokens=500,
             temperature=0.3,
         )
-
         return response.choices[0].message.content.strip()
 
     async def extract_entities(self, text: str) -> dict:
-        """
-        Extract key entities from the document:
-        names, dates, amounts, organizations, locations.
-        """
         if not text or len(text.strip()) == 0:
             return {}
-
         truncated_text = text[:8000] if len(text) > 8000 else text
-
         client = await self._get_client()
-
         response = await client.chat.completions.create(
             model=self.deployment,
             messages=[
@@ -107,7 +86,6 @@ class AIService:
             max_tokens=500,
             temperature=0.1,
         )
-
         import json
         try:
             raw = response.choices[0].message.content.strip()
@@ -117,16 +95,10 @@ class AIService:
             return {}
 
     async def answer_question(self, text: str, question: str) -> str:
-        """
-        Answer a question about the document content.
-        """
         if not text or len(text.strip()) == 0:
             return "No document content available to answer questions."
-
         truncated_text = text[:8000] if len(text) > 8000 else text
-
         client = await self._get_client()
-
         response = await client.chat.completions.create(
             model=self.deployment,
             messages=[
@@ -150,44 +122,37 @@ class AIService:
             max_tokens=500,
             temperature=0.3,
         )
-
         return response.choices[0].message.content.strip()
-        async def classify_document(self, text: str) -> str:
-    """
-    Classify the document type.
-    """
-    if not text or len(text.strip()) == 0:
-        return "unknown"
 
-    truncated_text = text[:4000] if len(text) > 4000 else text
-
-    client = await self._get_client()
-
-    response = await client.chat.completions.create(
-        model=self.deployment,
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are a document classification expert. "
-                    "Respond with exactly one word from this list only: "
-                    "invoice, contract, cv, report, id_document, letter, unknown. "
-                    "No explanation. No punctuation. Just the single word."
-                ),
-            },
-            {
-                "role": "user",
-                "content": (
-                    f"Classify this document into one of these types: "
-                    f"invoice, contract, cv, report, id_document, letter, unknown.\n\n"
-                    f"{truncated_text}"
-                ),
-            },
-        ],
-        max_tokens=10,
-        temperature=0.0,
-    )
-
-    result = response.choices[0].message.content.strip().lower()
-    valid = ["invoice", "contract", "cv", "report", "id_document", "letter", "unknown"]
-    return result if result in valid else "unknown"
+    async def classify_document(self, text: str) -> str:
+        if not text or len(text.strip()) == 0:
+            return "unknown"
+        truncated_text = text[:4000] if len(text) > 4000 else text
+        client = await self._get_client()
+        response = await client.chat.completions.create(
+            model=self.deployment,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a document classification expert. "
+                        "Respond with exactly one word from this list only: "
+                        "invoice, contract, cv, report, id_document, letter, unknown. "
+                        "No explanation. No punctuation. Just the single word."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        f"Classify this document into one of these types: "
+                        f"invoice, contract, cv, report, id_document, letter, unknown.\n\n"
+                        f"{truncated_text}"
+                    ),
+                },
+            ],
+            max_tokens=10,
+            temperature=0.0,
+        )
+        result = response.choices[0].message.content.strip().lower()
+        valid = ["invoice", "contract", "cv", "report", "id_document", "letter", "unknown"]
+        return result if result in valid else "unknown"
