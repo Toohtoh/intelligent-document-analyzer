@@ -10,16 +10,9 @@ class OCRService:
         self.endpoint = settings.AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT
 
     async def extract_text(self, file_bytes: bytes, content_type: str) -> dict:
-        """
-        Send a document to Azure Document Intelligence and extract:
-        - Full text content
-        - Tables
-        - Key-value pairs
-        - Page count
-        """
-        credential = ManagedIdentityCredential()
-
-        async with credential:
+        if settings.AZURE_DOCUMENT_INTELLIGENCE_KEY:
+            from azure.core.credentials import AzureKeyCredential
+            credential = AzureKeyCredential(settings.AZURE_DOCUMENT_INTELLIGENCE_KEY)
             client = DocumentAnalysisClient(
                 endpoint=self.endpoint,
                 credential=credential,
@@ -30,13 +23,22 @@ class OCRService:
                     document=file_bytes,
                 )
                 result = await poller.result()
-
+        else:
+            credential = ManagedIdentityCredential()
+            async with credential:
+                client = DocumentAnalysisClient(
+                    endpoint=self.endpoint,
+                    credential=credential,
+                )
+                async with client:
+                    poller = await client.begin_analyze_document(
+                        model_id="prebuilt-document",
+                        document=file_bytes,
+                    )
+                    result = await poller.result()
         return self._parse_result(result)
 
     def _parse_result(self, result) -> dict:
-        """Parse the Document Intelligence result into a clean dict."""
-
-        # Extract full text page by page
         pages_text = []
         for page in result.pages:
             page_content = {
@@ -47,7 +49,6 @@ class OCRService:
             }
             pages_text.append(page_content)
 
-        # Extract tables
         tables = []
         for table in result.tables:
             table_data = {
@@ -64,7 +65,6 @@ class OCRService:
             }
             tables.append(table_data)
 
-        # Extract key-value pairs
         key_value_pairs = []
         if result.key_value_pairs:
             for kv in result.key_value_pairs:
@@ -74,7 +74,6 @@ class OCRService:
                         "value": kv.value.content,
                     })
 
-        # Full text as single string
         full_text = result.content if result.content else ""
 
         return {

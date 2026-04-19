@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     AZURE_OPENAI_ENDPOINT: str
     AZURE_OPENAI_DEPLOYMENT: str = "gpt-4o"
 
+    # Optional API keys for local development (fallback from Managed Identity)
+    AZURE_STORAGE_KEY: str = ""
+    AZURE_COSMOS_KEY: str = ""
+    AZURE_DOCUMENT_INTELLIGENCE_KEY: str = ""
+    AZURE_OPENAI_KEY: str = ""
+
     # Azure Key Vault
     AZURE_KEYVAULT_URI: str
 
@@ -35,6 +41,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"
 
 
 @lru_cache()

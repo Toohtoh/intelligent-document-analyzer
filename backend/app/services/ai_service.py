@@ -11,16 +11,22 @@ class AIService:
         self.deployment = settings.AZURE_OPENAI_DEPLOYMENT
 
     async def _get_client(self):
+        if settings.AZURE_OPENAI_KEY:
+            return AsyncAzureOpenAI(
+                azure_endpoint=self.endpoint,
+                azure_deployment=self.deployment,
+                api_version="2024-02-01",
+                api_key=settings.AZURE_OPENAI_KEY,
+            )
         credential = ManagedIdentityCredential()
         token = await credential.get_token("https://cognitiveservices.azure.com/.default")
         await credential.close()
-        client = AsyncAzureOpenAI(
+        return AsyncAzureOpenAI(
             azure_endpoint=self.endpoint,
             azure_deployment=self.deployment,
             api_version="2024-02-01",
             azure_ad_token=token.token,
         )
-        return client
 
     async def generate_summary(self, text: str) -> str:
         if not text or len(text.strip()) == 0:
