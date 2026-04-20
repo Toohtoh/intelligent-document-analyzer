@@ -46,7 +46,8 @@ class CosmosService:
             query = (
                 f"SELECT c.id, c.document_id, c.filename, c.original_filename, "
                 f"c.content_type, c.size_bytes, c.status, c.uploaded_at, "
-                f"c.saved_at FROM c ORDER BY c.saved_at DESC OFFSET 0 LIMIT {limit}"
+                f"c.saved_at, c.ai_result, c.ocr_result FROM c "
+                f"ORDER BY c.saved_at DESC OFFSET 0 LIMIT {limit}"
             )
             items = []
             async for item in container.query_items(query=query):

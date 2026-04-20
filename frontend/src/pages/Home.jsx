@@ -1,3 +1,4 @@
+import Dashboard from "../components/Dashboard";
 import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import UploadZone from "../components/UploadZone";
@@ -467,6 +468,7 @@ export default function Home() {
             { id: "upload",  label: t.upload },
             { id: "result",  label: t.result },
             { id: "history", label: `${t.history} (${documents.length})` },
+            { id: "dashboard", label: "📊 Dashboard" },
           ].map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
               padding: "8px 18px", borderRadius: "8px", border: "none",
@@ -790,6 +792,10 @@ export default function Home() {
               onDelete={handleDeleteDocument}
               lang={lang}
             />
+          )}
+          {activeTab === "dashboard" && (
+            <Dashboard 
+            documents={documents} lang={lang} isDark={isDark} />
           )}
         </div>
 
