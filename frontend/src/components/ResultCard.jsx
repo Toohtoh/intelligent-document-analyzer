@@ -11,6 +11,7 @@ const t = {
     download_pdf: "📥 PDF",
     download_docx: "📄 DOCX",
     download_png: "🖼️ PNG",
+    share: "🔗 Partager",
     summary_title: "Résumé IA — GPT-4o",
     entities_title: "Entités extraites",
     ocr_title: "Texte extrait — OCR",
@@ -32,6 +33,7 @@ const t = {
     download_pdf: "📥 PDF",
     download_docx: "📄 DOCX",
     download_png: "🖼️ PNG",
+    share: "🔗 Share",
     summary_title: "AI Summary — GPT-4o",
     entities_title: "Extracted entities",
     ocr_title: "Extracted text — OCR",
@@ -53,6 +55,7 @@ const t = {
     download_pdf: "📥 تحميل PDF",
     download_docx: "📄 تحميل DOCX",
     download_png: "🖼️ تحميل PNG",
+    share: "🔗 مشاركة",
     summary_title: "ملخص الذكاء الاصطناعي — GPT-4o",
     entities_title: "الكيانات المستخرجة",
     ocr_title: "النص المستخرج — OCR",
@@ -75,6 +78,7 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
   const [answer, setAnswer] = useState(null);
   const [isAsking, setIsAsking] = useState(false);
   const [showOCR, setShowOCR] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const text = t[lang] || t["fr"];
 
   const handleAsk = async () => {
@@ -87,46 +91,46 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
     setIsAsking(false);
   };
 
+  const handleShare = () => {
+    const url = `${window.location.origin}/share/${result.document_id}`;
+    navigator.clipboard.writeText(url);
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 2000);
+  };
+
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 20;
     const maxWidth = pageWidth - margin * 2;
     let y = 20;
-
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
     doc.setTextColor(99, 102, 241);
     doc.text(`DocAnalyzer — ${text.report_title}`, margin, y); y += 10;
-
     doc.setDrawColor(99, 102, 241);
     doc.setLineWidth(0.5);
     doc.line(margin, y, pageWidth - margin, y); y += 10;
-
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(100, 116, 139);
     doc.text(`${result.original_filename}`, margin, y); y += 6;
     doc.text(`${result.ocr_result.page_count} ${text.pages} · ${result.ocr_result.word_count} ${text.words} · ${(result.size_bytes / 1024 / 1024).toFixed(2)} MB`, margin, y); y += 12;
-
     doc.setFont("helvetica", "bold");
     doc.setFontSize(13);
     doc.setTextColor(30, 30, 30);
     doc.text(text.summary_title, margin, y); y += 8;
-
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(50, 50, 50);
     const summaryLines = doc.splitTextToSize(result.ai_result.summary || "", maxWidth);
     doc.text(summaryLines, margin, y);
     y += summaryLines.length * 5 + 12;
-
     if (result.ai_result.entities) {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(13);
       doc.setTextColor(30, 30, 30);
       doc.text(text.entities_title, margin, y); y += 8;
-
       Object.entries(result.ai_result.entities).forEach(([type, items]) => {
         if (!items?.length) return;
         doc.setFont("helvetica", "bold");
@@ -140,7 +144,6 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
         y += line.length * 5 + 4;
       });
     }
-
     if (answer) {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(13);
@@ -155,7 +158,6 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
       const answerLines = doc.splitTextToSize(answer, maxWidth);
       doc.text(answerLines, margin, y);
     }
-
     doc.setFont("helvetica", "italic");
     doc.setFontSize(9);
     doc.setTextColor(150, 150, 150);
@@ -191,7 +193,6 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
         ],
       }],
     });
-
     const blob = await Packer.toBlob(doc);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -206,35 +207,28 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
     canvas.width = 1200;
     canvas.height = 630;
     const ctx = canvas.getContext("2d");
-
     ctx.fillStyle = "#0A0F1E";
     ctx.fillRect(0, 0, 1200, 630);
-
     const grad = ctx.createLinearGradient(0, 0, 1200, 0);
     grad.addColorStop(0, "#6366F1");
     grad.addColorStop(1, "#06B6D4");
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 1200, 6);
-
     ctx.fillStyle = "#F8FAFC";
     ctx.font = "bold 36px sans-serif";
     ctx.fillText("DocAnalyzer", 60, 80);
-
     ctx.fillStyle = "rgba(99,102,241,0.15)";
     ctx.roundRect(60, 100, 280, 32, 16);
     ctx.fill();
     ctx.fillStyle = "#818CF8";
     ctx.font = "13px sans-serif";
     ctx.fillText("Powered by Azure OpenAI GPT-4o", 76, 121);
-
     ctx.fillStyle = "#64748B";
     ctx.font = "16px sans-serif";
     ctx.fillText(result.original_filename, 60, 175);
-
     ctx.fillStyle = "#6366F1";
     ctx.font = "bold 14px sans-serif";
     ctx.fillText(text.summary_title.toUpperCase(), 60, 220);
-
     ctx.fillStyle = "#CBD5E1";
     ctx.font = "16px sans-serif";
     const summary = result.ai_result?.summary || "";
@@ -253,11 +247,9 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
       }
     }
     if (line) ctx.fillText(line, 60, y);
-
     ctx.fillStyle = "#334155";
     ctx.font = "13px sans-serif";
     ctx.fillText(text.report_footer, 60, 600);
-
     canvas.toBlob((blob) => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -277,13 +269,13 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
   };
 
   const docTypeConfig = {
-    invoice:     { icon: "🧾", label: { fr: "Facture",            en: "Invoice",     ar: "فاتورة"      }, color: "#F59E0B" },
-    contract:    { icon: "📜", label: { fr: "Contrat",            en: "Contract",    ar: "عقد"         }, color: "#6366F1" },
-    cv:          { icon: "👤", label: { fr: "CV",                 en: "CV",          ar: "سيرة ذاتية"  }, color: "#8B5CF6" },
-    report:      { icon: "📊", label: { fr: "Rapport",            en: "Report",      ar: "تقرير"       }, color: "#06B6D4" },
-    id_document: { icon: "🪪", label: { fr: "Pièce d'identité",  en: "ID Document", ar: "وثيقة هوية"  }, color: "#10B981" },
-    letter:      { icon: "📬", label: { fr: "Lettre",            en: "Letter",      ar: "رسالة"       }, color: "#EC4899" },
-    unknown:     { icon: "❓", label: { fr: "Inconnu",           en: "Unknown",     ar: "غير معروف"   }, color: "#64748B" },
+    invoice:     { icon: "🧾", label: { fr: "Facture",           en: "Invoice",     ar: "فاتورة"     }, color: "#F59E0B" },
+    contract:    { icon: "📜", label: { fr: "Contrat",           en: "Contract",    ar: "عقد"        }, color: "#6366F1" },
+    cv:          { icon: "👤", label: { fr: "CV",                en: "CV",          ar: "سيرة ذاتية" }, color: "#8B5CF6" },
+    report:      { icon: "📊", label: { fr: "Rapport",           en: "Report",      ar: "تقرير"      }, color: "#06B6D4" },
+    id_document: { icon: "🪪", label: { fr: "Pièce d'identité", en: "ID Document", ar: "وثيقة هوية" }, color: "#10B981" },
+    letter:      { icon: "📬", label: { fr: "Lettre",           en: "Letter",      ar: "رسالة"      }, color: "#EC4899" },
+    unknown:     { icon: "❓", label: { fr: "Inconnu",          en: "Unknown",     ar: "غير معروف"  }, color: "#64748B" },
   };
 
   const card = {
@@ -291,7 +283,6 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
     borderRadius: "20px", padding: "24px", marginBottom: "0",
   };
 
-  // Resolve doc type badge
   const dtype = result.ai_result?.document_type;
   const dtypeCfg = dtype ? (docTypeConfig[dtype] || docTypeConfig["unknown"]) : null;
 
@@ -301,14 +292,12 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
       {/* Header */}
       <div style={{ ...card, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "12px" }}>
         <div>
-          <div style={{
-            fontSize: "11px", fontWeight: "700", color: "var(--indigo)",
-            letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px",
-          }}>{text.analyzed}</div>
-          <h2 style={{
-            fontFamily: "var(--font-display)", fontSize: "20px",
-            fontWeight: "700", color: "var(--text-primary)", marginBottom: "8px",
-          }}>{result.original_filename}</h2>
+          <div style={{ fontSize: "11px", fontWeight: "700", color: "var(--indigo)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" }}>
+            {text.analyzed}
+          </div>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: "700", color: "var(--text-primary)", marginBottom: "8px" }}>
+            {result.original_filename}
+          </h2>
           <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
             {[
               { icon: "📄", value: `${result.ocr_result.page_count} ${text.pages}` },
@@ -321,29 +310,22 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px" }}>
-
-          {/* Document type badge */}
           {dtypeCfg && (
             <span style={{
-              background: `${dtypeCfg.color}18`,
-              border: `1px solid ${dtypeCfg.color}40`,
-              color: dtypeCfg.color,
-              borderRadius: "20px", padding: "5px 14px",
+              background: `${dtypeCfg.color}18`, border: `1px solid ${dtypeCfg.color}40`,
+              color: dtypeCfg.color, borderRadius: "20px", padding: "5px 14px",
               fontSize: "13px", fontWeight: "600",
               display: "flex", alignItems: "center", gap: "6px",
             }}>
               {dtypeCfg.icon} {dtypeCfg.label[lang] || dtypeCfg.label["en"]}
             </span>
           )}
-
-          {/* Completed badge */}
           <span style={{
             background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)",
             color: "var(--green)", borderRadius: "20px", padding: "5px 14px",
             fontSize: "13px", fontWeight: "600",
           }}>{text.completed}</span>
 
-          {/* Download buttons */}
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <button onClick={handleDownloadPDF} style={{
               display: "flex", alignItems: "center", gap: "6px",
@@ -373,6 +355,16 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
               fontSize: "13px", fontWeight: "600", fontFamily: "var(--font-body)",
               transition: "all 0.2s",
             }}>{text.download_png}</button>
+
+            <button onClick={handleShare} style={{
+              display: "flex", alignItems: "center", gap: "6px",
+              padding: "8px 14px", borderRadius: "10px",
+              border: "1.5px solid rgba(16,185,129,0.3)",
+              background: shareCopied ? "rgba(16,185,129,0.15)" : "rgba(16,185,129,0.08)",
+              color: "var(--green)", cursor: "pointer",
+              fontSize: "13px", fontWeight: "600", fontFamily: "var(--font-body)",
+              transition: "all 0.2s",
+            }}>{shareCopied ? "✅ Copié !" : text.share}</button>
           </div>
         </div>
       </div>

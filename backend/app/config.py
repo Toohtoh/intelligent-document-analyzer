@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     # Auth0
     AUTH0_DOMAIN: str = "intelligent-docanalyzer.eu.auth0.com"
     AUTH0_AUDIENCE: str = "https://docanalyzer-api"
+    APPINSIGHTS_CONNECTION_STRING: str = "InstrumentationKey=f52c5e5d-0776-4048-a11b-1c6b65a16537;IngestionEndpoint=https://switzerlandnorth-0.in.applicationinsights.azure.com/;LiveEndpoint=https://switzerlandnorth.livediagnostics.monitor.azure.com/;ApplicationId=a5e2353b-30d3-4cf7-96e5-e3b6bfb74fac"
 
     class Config:
         env_file = ".env"

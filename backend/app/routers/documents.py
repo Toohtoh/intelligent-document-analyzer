@@ -234,3 +234,16 @@ async def upload_document(
         uploaded_at=datetime.utcnow(),
         message=f"File '{clean_filename}' uploaded successfully.",
     )
+
+@router.get("/share/{document_id}")
+async def get_shared_document(document_id: str):
+    """Public endpoint — no auth required."""
+    try:
+        cosmos_service = CosmosService()
+        document = await cosmos_service.get_document(document_id)
+        return document
+    except Exception as e:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Document not found: {str(e)}",
+        )

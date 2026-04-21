@@ -5,6 +5,25 @@ from app.routers import health, documents
 
 settings = get_settings()
 
+# ── Application Insights ──────────────────────────────────────────────────────
+try:
+    from opencensus.ext.azure.log_exporter import AzureLogHandler
+    from opencensus.ext.azure.trace_exporter import AzureExporter
+    from opencensus.trace.samplers import ProbabilitySampler
+    from opencensus.ext.flask import FlaskMiddleware
+    import logging
+
+    APPINSIGHTS_KEY = settings.APPINSIGHTS_CONNECTION_STRING
+    if APPINSIGHTS_KEY:
+        logger = logging.getLogger(__name__)
+        logger.addHandler(AzureLogHandler(
+            connection_string=APPINSIGHTS_KEY
+        ))
+        logger.setLevel(logging.INFO)
+        logger.info("Application Insights connected")
+except Exception as e:
+    print(f"App Insights not configured: {e}")
+
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
@@ -13,7 +32,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Will be restricted in Week 3
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
