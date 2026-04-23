@@ -91,6 +91,15 @@ module openAI 'modules/openai.bicep' = {
     openAIName: openAIName
   }
 }
+resource staticWebApp 'Microsoft.Web/staticSites@2022-03-01' = {
+  name: 'stapp-docanalyzer'
+  location: 'westeurope'
+  sku: {
+    name: 'Free'
+    tier: 'Free'
+  }
+  properties: {}
+}
 
 // ===== OUTPUTS =====
 output keyVaultName string = keyVault.outputs.keyVaultName
