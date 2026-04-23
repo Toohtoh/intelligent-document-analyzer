@@ -34,7 +34,7 @@ class RegenerateSummaryRequest(BaseModel):
     document_id: str
     original_summary: str
     ocr_text: str
-    style: str  # bullet, short, detailed, formal, simple
+    style: str
 
 
 def sanitize_filename(filename: str) -> str:
@@ -49,17 +49,15 @@ async def upload_and_analyze(
     file: UploadFile = File(...),
     token: dict = Depends(verify_token),
 ):
+    user_id = token["sub"]
+
     if file.content_type not in ALLOWED_CONTENT_TYPES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"File type '{file.content_type}' not allowed.",
-        )
+        raise HTTPException(status_code=400, detail=f"File type '{file.content_type}' not allowed.")
 
     file_bytes = await file.read()
 
     if len(file_bytes) > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="File too large. Maximum 10MB.")
-
     if len(file_bytes) == 0:
         raise HTTPException(status_code=400, detail="File is empty.")
 
@@ -121,7 +119,7 @@ async def upload_and_analyze(
 
     try:
         cosmos_service = CosmosService()
-        await cosmos_service.save_document(result.copy())
+        await cosmos_service.save_document(result.copy(), user_id=user_id)
     except Exception as e:
         result["cosmos_warning"] = f"Results not saved to DB: {str(e)}"
 
@@ -133,18 +131,13 @@ async def list_documents(
     limit: int = 20,
     token: dict = Depends(verify_token),
 ):
+    user_id = token["sub"]
     try:
         cosmos_service = CosmosService()
-        documents = await cosmos_service.list_documents(limit=limit)
-        return {
-            "count": len(documents),
-            "documents": documents,
-        }
+        documents = await cosmos_service.list_documents(user_id=user_id, limit=limit)
+        return {"count": len(documents), "documents": documents}
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to retrieve documents: {str(e)}",
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve documents: {str(e)}")
 
 
 @router.get("/documents/{document_id}")
@@ -152,15 +145,17 @@ async def get_document(
     document_id: str,
     token: dict = Depends(verify_token),
 ):
+    user_id = token["sub"]
     try:
         cosmos_service = CosmosService()
-        document = await cosmos_service.get_document(document_id)
+        document = await cosmos_service.get_document(document_id, user_id=user_id)
+        if document.get("userId") != user_id:
+            raise HTTPException(status_code=403, detail="Access denied.")
         return document
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Document not found: {str(e)}",
-        )
+        raise HTTPException(status_code=404, detail=f"Document not found: {str(e)}")
 
 
 @router.delete("/documents/{document_id}")
@@ -168,15 +163,18 @@ async def delete_document(
     document_id: str,
     token: dict = Depends(verify_token),
 ):
+    user_id = token["sub"]
     try:
         cosmos_service = CosmosService()
-        await cosmos_service.delete_document(document_id)
+        document = await cosmos_service.get_document(document_id, user_id=user_id)
+        if document.get("userId") != user_id:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        await cosmos_service.delete_document(document_id, user_id=user_id)
         return {"message": f"Document {document_id} deleted successfully."}
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Document not found: {str(e)}",
-        )
+        raise HTTPException(status_code=404, detail=f"Document not found: {str(e)}")
 
 
 @router.post("/ask")
@@ -186,24 +184,16 @@ async def ask_question(
 ):
     if not request.question or len(request.question.strip()) == 0:
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
-
     if not request.text or len(request.text.strip()) == 0:
         raise HTTPException(status_code=400, detail="Document text cannot be empty.")
 
     try:
         ai_service = AIService()
-        answer = await ai_service.answer_question(
-            text=request.text,
-            question=request.question,
-        )
+        answer = await ai_service.answer_question(text=request.text, question=request.question)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to answer: {str(e)}")
 
-    return {
-        "document_id": request.document_id,
-        "question": request.question,
-        "answer": answer,
-    }
+    return {"document_id": request.document_id, "question": request.question, "answer": answer}
 
 
 @router.post("/regenerate-summary")
@@ -229,11 +219,7 @@ async def regenerate_summary(
     try:
         ai_service = AIService()
         new_summary = await ai_service.generate_custom_summary(prompt)
-        return {
-            "document_id": request.document_id,
-            "style": style,
-            "summary": new_summary,
-        }
+        return {"document_id": request.document_id, "style": style, "summary": new_summary}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Regeneration failed: {str(e)}")
 
@@ -250,7 +236,6 @@ async def upload_document(
 
     if len(file_bytes) > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="File too large. Maximum 10MB.")
-
     if len(file_bytes) == 0:
         raise HTTPException(status_code=400, detail="File is empty.")
 
@@ -281,10 +266,8 @@ async def get_shared_document(document_id: str):
     """Public endpoint — no auth required."""
     try:
         cosmos_service = CosmosService()
+        # Share uses DEFAULT_USER_ID partition — old docs still work
         document = await cosmos_service.get_document(document_id)
         return document
     except Exception as e:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Document not found: {str(e)}",
-        )
+        raise HTTPException(status_code=404, detail=f"Document not found: {str(e)}")
