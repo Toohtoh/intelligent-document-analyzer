@@ -7,11 +7,12 @@ const t = {
   fr: {
     analyzed: "Document analysé",
     pages: "pages", words: "mots",
-    completed: "✓ Complété",
-    download_pdf: "📥 PDF",
-    download_docx: "📄 DOCX",
-    download_png: "🖼️ PNG",
-    share: "🔗 Partager",
+    completed: "Complété",
+    download_pdf: "PDF",
+    download_docx: "DOCX",
+    download_png: "PNG",
+    share: "Partager",
+    copied: "Copié !",
     summary_title: "Résumé IA — GPT-4o",
     entities_title: "Entités extraites",
     ocr_title: "Texte extrait — OCR",
@@ -29,11 +30,12 @@ const t = {
   en: {
     analyzed: "Analyzed document",
     pages: "pages", words: "words",
-    completed: "✓ Completed",
-    download_pdf: "📥 PDF",
-    download_docx: "📄 DOCX",
-    download_png: "🖼️ PNG",
-    share: "🔗 Share",
+    completed: "Completed",
+    download_pdf: "PDF",
+    download_docx: "DOCX",
+    download_png: "PNG",
+    share: "Share",
+    copied: "Copied!",
     summary_title: "AI Summary — GPT-4o",
     entities_title: "Extracted entities",
     ocr_title: "Extracted text — OCR",
@@ -51,11 +53,12 @@ const t = {
   ar: {
     analyzed: "المستند المحلل",
     pages: "صفحات", words: "كلمات",
-    completed: "✓ مكتمل",
-    download_pdf: "📥 تحميل PDF",
-    download_docx: "📄 تحميل DOCX",
-    download_png: "🖼️ تحميل PNG",
-    share: "🔗 مشاركة",
+    completed: "مكتمل",
+    download_pdf: "PDF",
+    download_docx: "DOCX",
+    download_png: "PNG",
+    share: "مشاركة",
+    copied: "تم النسخ!",
     summary_title: "ملخص الذكاء الاصطناعي — GPT-4o",
     entities_title: "الكيانات المستخرجة",
     ocr_title: "النص المستخرج — OCR",
@@ -70,6 +73,138 @@ const t = {
     last_qa: "آخر إجابة",
     question_label: "السؤال",
   },
+};
+
+// ─── SVG Icons ────────────────────────────────────────────────────────────────
+const IconDownload = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+    <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+  </svg>
+);
+const IconDocx = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+  </svg>
+);
+const IconImage = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/>
+    <circle cx="8.5" cy="8.5" r="1.5"/>
+    <polyline points="21 15 16 10 5 21"/>
+  </svg>
+);
+const IconShare = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+  </svg>
+);
+const IconCheck = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+);
+const IconBrain = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9.5 2a2.5 2.5 0 0 1 5 0c1 0 2.5.5 2.5 2.5 1.5.5 2.5 1.5 2.5 3a3 3 0 0 1-1 2.24V14a5 5 0 0 1-10 0V9.74A3 3 0 0 1 7 7.5c0-1.5 1-2.5 2.5-3V2z"/>
+  </svg>
+);
+const IconTag = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+    <line x1="7" y1="7" x2="7.01" y2="7"/>
+  </svg>
+);
+const IconText = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/>
+    <line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/>
+  </svg>
+);
+const IconQuestion = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+);
+const IconPage = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+  </svg>
+);
+const IconWords = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="10" x2="14" y2="10"/>
+    <line x1="4" y1="14" x2="20" y2="14"/><line x1="4" y1="18" x2="14" y2="18"/>
+  </svg>
+);
+const IconSize = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+  </svg>
+);
+const IconChevron = ({ open }) => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+    style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s" }}>
+    <polyline points="6 9 12 15 18 9"/>
+  </svg>
+);
+
+// Doc type icons — SVG only, no emoji
+const DocTypeIcon = ({ type }) => {
+  const icons = {
+    invoice: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="11" y2="17"/>
+        <polyline points="14 2 14 8 20 8"/>
+      </svg>
+    ),
+    contract: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    ),
+    cv: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+    ),
+    report: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/>
+      </svg>
+    ),
+    id_document: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="5" width="20" height="14" rx="2"/>
+        <circle cx="8" cy="12" r="2"/>
+        <line x1="12" y1="10" x2="18" y2="10"/><line x1="12" y1="14" x2="16" y2="14"/>
+      </svg>
+    ),
+    letter: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+    ),
+    unknown: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    ),
+  };
+  return icons[type] || icons.unknown;
 };
 
 export default function ResultCard({ result, isDark, lang = "fr" }) {
@@ -204,78 +339,54 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
 
   const handleDownloadPNG = () => {
     const canvas = document.createElement("canvas");
-    canvas.width = 1200;
-    canvas.height = 630;
+    canvas.width = 1200; canvas.height = 630;
     const ctx = canvas.getContext("2d");
     ctx.fillStyle = "#0A0F1E";
     ctx.fillRect(0, 0, 1200, 630);
     const grad = ctx.createLinearGradient(0, 0, 1200, 0);
-    grad.addColorStop(0, "#6366F1");
-    grad.addColorStop(1, "#06B6D4");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 1200, 6);
-    ctx.fillStyle = "#F8FAFC";
-    ctx.font = "bold 36px sans-serif";
-    ctx.fillText("DocAnalyzer", 60, 80);
-    ctx.fillStyle = "rgba(99,102,241,0.15)";
-    ctx.roundRect(60, 100, 280, 32, 16);
-    ctx.fill();
-    ctx.fillStyle = "#818CF8";
-    ctx.font = "13px sans-serif";
-    ctx.fillText("Powered by Azure OpenAI GPT-4o", 76, 121);
-    ctx.fillStyle = "#64748B";
-    ctx.font = "16px sans-serif";
-    ctx.fillText(result.original_filename, 60, 175);
-    ctx.fillStyle = "#6366F1";
-    ctx.font = "bold 14px sans-serif";
-    ctx.fillText(text.summary_title.toUpperCase(), 60, 220);
-    ctx.fillStyle = "#CBD5E1";
-    ctx.font = "16px sans-serif";
+    grad.addColorStop(0, "#6366F1"); grad.addColorStop(1, "#06B6D4");
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, 1200, 6);
+    ctx.fillStyle = "#F8FAFC"; ctx.font = "bold 36px sans-serif"; ctx.fillText("DocAnalyzer", 60, 80);
+    ctx.fillStyle = "rgba(99,102,241,0.15)"; ctx.roundRect(60, 100, 280, 32, 16); ctx.fill();
+    ctx.fillStyle = "#818CF8"; ctx.font = "13px sans-serif"; ctx.fillText("Powered by Azure OpenAI GPT-4o", 76, 121);
+    ctx.fillStyle = "#64748B"; ctx.font = "16px sans-serif"; ctx.fillText(result.original_filename, 60, 175);
+    ctx.fillStyle = "#6366F1"; ctx.font = "bold 14px sans-serif"; ctx.fillText(text.summary_title.toUpperCase(), 60, 220);
+    ctx.fillStyle = "#CBD5E1"; ctx.font = "16px sans-serif";
     const summary = result.ai_result?.summary || "";
     const words = summary.split(" ");
-    let line = "";
-    let y = 248;
+    let line = "", y = 248;
     for (const word of words) {
       const test = line + word + " ";
       if (ctx.measureText(test).width > 1080 || y > 480) break;
-      if (ctx.measureText(test).width > 1080) {
-        ctx.fillText(line, 60, y);
-        line = word + " ";
-        y += 26;
-      } else {
-        line = test;
-      }
+      if (ctx.measureText(test).width > 1080) { ctx.fillText(line, 60, y); line = word + " "; y += 26; }
+      else { line = test; }
     }
     if (line) ctx.fillText(line, 60, y);
-    ctx.fillStyle = "#334155";
-    ctx.font = "13px sans-serif";
-    ctx.fillText(text.report_footer, 60, 600);
+    ctx.fillStyle = "#334155"; ctx.font = "13px sans-serif"; ctx.fillText(text.report_footer, 60, 600);
     canvas.toBlob((blob) => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
-      a.download = `rapport_${result.filename || "document"}.png`;
-      a.click();
+      a.href = url; a.download = `rapport_${result.filename || "document"}.png`; a.click();
       URL.revokeObjectURL(url);
     });
   };
 
   const entityColors = {
-    organizations: { bg: "rgba(99,102,241,0.1)", border: "rgba(99,102,241,0.25)", text: "var(--indigo)" },
-    people:        { bg: "rgba(168,85,247,0.1)",  border: "rgba(168,85,247,0.25)",  text: "#A855F7" },
-    dates:         { bg: "rgba(245,158,11,0.1)",  border: "rgba(245,158,11,0.25)",  text: "#D97706" },
-    locations:     { bg: "rgba(16,185,129,0.1)",  border: "rgba(16,185,129,0.25)",  text: "#059669" },
-    amounts:       { bg: "rgba(244,63,94,0.1)",   border: "rgba(244,63,94,0.25)",   text: "#E11D48" },
+    organizations: { bg: "rgba(99,102,241,0.1)",  border: "rgba(99,102,241,0.25)", text: "var(--indigo)" },
+    people:        { bg: "rgba(168,85,247,0.1)",   border: "rgba(168,85,247,0.25)", text: "#A855F7" },
+    dates:         { bg: "rgba(245,158,11,0.1)",   border: "rgba(245,158,11,0.25)", text: "#D97706" },
+    locations:     { bg: "rgba(16,185,129,0.1)",   border: "rgba(16,185,129,0.25)", text: "#059669" },
+    amounts:       { bg: "rgba(244,63,94,0.1)",    border: "rgba(244,63,94,0.25)",  text: "#E11D48" },
   };
 
   const docTypeConfig = {
-    invoice:     { icon: "🧾", label: { fr: "Facture",           en: "Invoice",     ar: "فاتورة"     }, color: "#F59E0B" },
-    contract:    { icon: "📜", label: { fr: "Contrat",           en: "Contract",    ar: "عقد"        }, color: "#6366F1" },
-    cv:          { icon: "👤", label: { fr: "CV",                en: "CV",          ar: "سيرة ذاتية" }, color: "#8B5CF6" },
-    report:      { icon: "📊", label: { fr: "Rapport",           en: "Report",      ar: "تقرير"      }, color: "#06B6D4" },
-    id_document: { icon: "🪪", label: { fr: "Pièce d'identité", en: "ID Document", ar: "وثيقة هوية" }, color: "#10B981" },
-    letter:      { icon: "📬", label: { fr: "Lettre",           en: "Letter",      ar: "رسالة"      }, color: "#EC4899" },
-    unknown:     { icon: "❓", label: { fr: "Inconnu",          en: "Unknown",     ar: "غير معروف"  }, color: "#64748B" },
+    invoice:     { label: { fr: "Facture",           en: "Invoice",     ar: "فاتورة"     }, color: "#F59E0B" },
+    contract:    { label: { fr: "Contrat",           en: "Contract",    ar: "عقد"        }, color: "#6366F1" },
+    cv:          { label: { fr: "CV",                en: "CV",          ar: "سيرة ذاتية" }, color: "#8B5CF6" },
+    report:      { label: { fr: "Rapport",           en: "Report",      ar: "تقرير"      }, color: "#06B6D4" },
+    id_document: { label: { fr: "Pièce d'identité", en: "ID Document", ar: "وثيقة هوية" }, color: "#10B981" },
+    letter:      { label: { fr: "Lettre",           en: "Letter",      ar: "رسالة"      }, color: "#EC4899" },
+    unknown:     { label: { fr: "Inconnu",          en: "Unknown",     ar: "غير معروف"  }, color: "#64748B" },
   };
 
   const card = {
@@ -285,6 +396,14 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
 
   const dtype = result.ai_result?.document_type;
   const dtypeCfg = dtype ? (docTypeConfig[dtype] || docTypeConfig["unknown"]) : null;
+
+  // Shared button base
+  const btnBase = {
+    display: "flex", alignItems: "center", gap: "6px",
+    padding: "8px 14px", borderRadius: "10px",
+    fontSize: "13px", fontWeight: "600", fontFamily: "var(--font-body)",
+    cursor: "pointer", transition: "all 0.2s",
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -300,11 +419,13 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
           </h2>
           <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
             {[
-              { icon: "📄", value: `${result.ocr_result.page_count} ${text.pages}` },
-              { icon: "📝", value: `${result.ocr_result.word_count} ${text.words}` },
-              { icon: "💾", value: `${(result.size_bytes / 1024 / 1024).toFixed(2)} MB` },
+              { icon: <IconPage />,  value: `${result.ocr_result.page_count} ${text.pages}` },
+              { icon: <IconWords />, value: `${result.ocr_result.word_count} ${text.words}` },
+              { icon: <IconSize />,  value: `${(result.size_bytes / 1024 / 1024).toFixed(2)} MB` },
             ].map((s, i) => (
-              <span key={i} style={{ fontSize: "13px", color: "var(--text-muted)" }}>{s.icon} {s.value}</span>
+              <span key={i} style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "13px", color: "var(--text-muted)" }}>
+                <span style={{ opacity: 0.6 }}>{s.icon}</span>{s.value}
+              </span>
             ))}
           </div>
         </div>
@@ -317,54 +438,55 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
               fontSize: "13px", fontWeight: "600",
               display: "flex", alignItems: "center", gap: "6px",
             }}>
-              {dtypeCfg.icon} {dtypeCfg.label[lang] || dtypeCfg.label["en"]}
+              <DocTypeIcon type={dtype} />
+              {dtypeCfg.label[lang] || dtypeCfg.label["en"]}
             </span>
           )}
+
           <span style={{
             background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)",
             color: "var(--green)", borderRadius: "20px", padding: "5px 14px",
             fontSize: "13px", fontWeight: "600",
-          }}>{text.completed}</span>
+            display: "flex", alignItems: "center", gap: "6px",
+          }}>
+            <IconCheck /> {text.completed}
+          </span>
 
+          {/* Action buttons */}
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <button onClick={handleDownloadPDF} style={{
-              display: "flex", alignItems: "center", gap: "6px",
-              padding: "8px 14px", borderRadius: "10px", border: "none",
+              ...btnBase, border: "none",
               background: "linear-gradient(135deg, var(--indigo), #4F46E5)",
-              color: "white", cursor: "pointer",
-              fontSize: "13px", fontWeight: "600", fontFamily: "var(--font-body)",
-              boxShadow: "0 0 16px rgba(99,102,241,0.2)", transition: "all 0.2s",
-            }}>{text.download_pdf}</button>
+              color: "white", boxShadow: "0 0 16px rgba(99,102,241,0.2)",
+            }}>
+              <IconDownload /> {text.download_pdf}
+            </button>
 
             <button onClick={handleDownloadDOCX} style={{
-              display: "flex", alignItems: "center", gap: "6px",
-              padding: "8px 14px", borderRadius: "10px",
+              ...btnBase,
               border: "1.5px solid rgba(99,102,241,0.3)",
-              background: "rgba(99,102,241,0.08)",
-              color: "var(--indigo)", cursor: "pointer",
-              fontSize: "13px", fontWeight: "600", fontFamily: "var(--font-body)",
-              transition: "all 0.2s",
-            }}>{text.download_docx}</button>
+              background: "rgba(99,102,241,0.08)", color: "var(--indigo)",
+            }}>
+              <IconDocx /> {text.download_docx}
+            </button>
 
             <button onClick={handleDownloadPNG} style={{
-              display: "flex", alignItems: "center", gap: "6px",
-              padding: "8px 14px", borderRadius: "10px",
+              ...btnBase,
               border: "1.5px solid rgba(6,182,212,0.3)",
-              background: "rgba(6,182,212,0.08)",
-              color: "var(--cyan)", cursor: "pointer",
-              fontSize: "13px", fontWeight: "600", fontFamily: "var(--font-body)",
-              transition: "all 0.2s",
-            }}>{text.download_png}</button>
+              background: "rgba(6,182,212,0.08)", color: "var(--cyan)",
+            }}>
+              <IconImage /> {text.download_png}
+            </button>
 
             <button onClick={handleShare} style={{
-              display: "flex", alignItems: "center", gap: "6px",
-              padding: "8px 14px", borderRadius: "10px",
+              ...btnBase,
               border: "1.5px solid rgba(16,185,129,0.3)",
               background: shareCopied ? "rgba(16,185,129,0.15)" : "rgba(16,185,129,0.08)",
-              color: "var(--green)", cursor: "pointer",
-              fontSize: "13px", fontWeight: "600", fontFamily: "var(--font-body)",
-              transition: "all 0.2s",
-            }}>{shareCopied ? "✅ Copié !" : text.share}</button>
+              color: "var(--green)",
+            }}>
+              {shareCopied ? <IconCheck /> : <IconShare />}
+              {shareCopied ? text.copied : text.share}
+            </button>
           </div>
         </div>
       </div>
@@ -375,16 +497,15 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
           <div style={{
             width: "32px", height: "32px", borderRadius: "8px",
             background: "linear-gradient(135deg, var(--indigo), var(--cyan))",
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px",
-          }}>🧠</div>
+            display: "flex", alignItems: "center", justifyContent: "center", color: "white",
+          }}><IconBrain /></div>
           <span style={{ fontFamily: "var(--font-display)", fontWeight: "700", fontSize: "15px", color: "var(--text-primary)" }}>
             {text.summary_title}
           </span>
         </div>
-        <p style={{
-          color: "var(--text-soft)", lineHeight: "1.8", fontSize: "15px",
-          borderLeft: "3px solid var(--indigo)", paddingLeft: "16px",
-        }}>{result.ai_result.summary}</p>
+        <p style={{ color: "var(--text-soft)", lineHeight: "1.8", fontSize: "15px", borderLeft: "3px solid var(--indigo)", paddingLeft: "16px" }}>
+          {result.ai_result.summary}
+        </p>
       </div>
 
       {/* Entities */}
@@ -394,8 +515,8 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
             <div style={{
               width: "32px", height: "32px", borderRadius: "8px",
               background: "rgba(245,158,11,0.15)", border: "1px solid rgba(245,158,11,0.25)",
-              display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px",
-            }}>🏷️</div>
+              display: "flex", alignItems: "center", justifyContent: "center", color: "#D97706",
+            }}><IconTag /></div>
             <span style={{ fontFamily: "var(--font-display)", fontWeight: "700", fontSize: "15px", color: "var(--text-primary)" }}>
               {text.entities_title}
             </span>
@@ -412,8 +533,8 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
                   {items.map((item, i) => (
                     <span key={i} style={{
                       background: colors.bg, border: `1px solid ${colors.border}`,
-                      color: colors.text, borderRadius: "8px",
-                      padding: "4px 12px", fontSize: "13px", fontWeight: "500",
+                      color: colors.text, borderRadius: "8px", padding: "4px 12px",
+                      fontSize: "13px", fontWeight: "500",
                     }}>{item}</span>
                   ))}
                 </div>
@@ -439,8 +560,8 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
             <div style={{
               width: "32px", height: "32px", borderRadius: "8px",
               background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.25)",
-              display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px",
-            }}>📝</div>
+              display: "flex", alignItems: "center", justifyContent: "center", color: "var(--cyan)",
+            }}><IconText /></div>
             <span style={{ fontFamily: "var(--font-display)", fontWeight: "700", fontSize: "15px", color: "var(--text-primary)" }}>
               {text.ocr_title}
             </span>
@@ -448,21 +569,15 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
               {result.ocr_result.word_count} {text.words}
             </span>
           </div>
-          <span style={{
-            color: "var(--text-muted)", fontSize: "16px",
-            transform: showOCR ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.3s", display: "inline-block",
-          }}>▼</span>
+          <span style={{ color: "var(--text-muted)" }}><IconChevron open={showOCR} /></span>
         </button>
         {showOCR && (
           <div style={{ padding: "0 24px 24px" }}>
             <pre style={{
               background: "var(--navy)", border: "1px solid var(--navy-border)",
-              borderRadius: "12px", padding: "16px",
-              fontSize: "12px", color: "var(--text-muted)",
-              maxHeight: "220px", overflowY: "auto",
-              whiteSpace: "pre-wrap", fontFamily: "'Courier New', monospace",
-              lineHeight: "1.7",
+              borderRadius: "12px", padding: "16px", fontSize: "12px", color: "var(--text-muted)",
+              maxHeight: "220px", overflowY: "auto", whiteSpace: "pre-wrap",
+              fontFamily: "'Courier New', monospace", lineHeight: "1.7",
             }}>{result.ocr_result.full_text}</pre>
           </div>
         )}
@@ -474,18 +589,17 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
           <div style={{
             width: "32px", height: "32px", borderRadius: "8px",
             background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.25)",
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px",
-          }}>❓</div>
+            display: "flex", alignItems: "center", justifyContent: "center", color: "#A855F7",
+          }}><IconQuestion /></div>
           <span style={{ fontFamily: "var(--font-display)", fontWeight: "700", fontSize: "15px", color: "var(--text-primary)" }}>
             {text.qa_title}
           </span>
         </div>
         <div style={{ display: "flex", gap: "10px" }}>
           <input
-            type="text"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAsk()}
+            type="text" value={question}
+            onChange={e => setQuestion(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleAsk()}
             placeholder={text.qa_placeholder}
             dir={lang === "ar" ? "rtl" : "ltr"}
             style={{
@@ -499,8 +613,7 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
             onBlur={e => e.target.style.borderColor = "var(--navy-border)"}
           />
           <button
-            onClick={handleAsk}
-            disabled={isAsking || !question.trim()}
+            onClick={handleAsk} disabled={isAsking || !question.trim()}
             style={{
               padding: "12px 24px", borderRadius: "12px", border: "none",
               background: isAsking || !question.trim() ? "var(--navy-border)" : "linear-gradient(135deg, var(--indigo), #4F46E5)",

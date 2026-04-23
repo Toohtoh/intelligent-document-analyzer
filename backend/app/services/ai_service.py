@@ -162,3 +162,22 @@ class AIService:
         result = response.choices[0].message.content.strip().lower()
         valid = ["invoice", "contract", "cv", "report", "id_document", "letter", "unknown"]
         return result if result in valid else "unknown"
+
+    async def generate_custom_summary(self, prompt: str) -> str:
+        client = await self._get_client()
+        response = await client.chat.completions.create(
+            model=self.deployment,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an expert document analyst. Follow the instruction exactly. Always respond in the same language as the document.",
+                },
+                {
+                    "role": "user",
+                    "content": prompt,
+                },
+            ],
+            max_tokens=600,
+            temperature=0.4,
+        )
+        return response.choices[0].message.content.strip()

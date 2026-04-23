@@ -1,9 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Dark mode (default) */
   --navy: #0A0F1E;
   --navy-soft: #111827;
   --navy-card: #161D2F;
@@ -19,7 +18,7 @@
   --text-primary: #F8FAFC;
   --text-soft: #CBD5E1;
   --text-muted: #64748B;
-  --font-display: 'Syne', sans-serif;
+  --font-display: 'Plus Jakarta Sans', sans-serif;
   --font-body: 'DM Sans', sans-serif;
   --bg-main: #0A0F1E;
   --bg-soft: #111827;
@@ -28,7 +27,6 @@
   --shadow: 0 4px 24px rgba(0,0,0,0.4);
 }
 
-/* Light mode */
 body.light {
   --navy: #F1F5F9;
   --navy-soft: #E2E8F0;
@@ -62,20 +60,39 @@ body {
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes pulse-ring {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(99,102,241,0.4); }
-  70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(99,102,241,0); }
+  0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(99,102,241,0.4); }
+  70%  { transform: scale(1);    box-shadow: 0 0 0 12px rgba(99,102,241,0); }
   100% { transform: scale(0.95); }
 }
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
+@keyframes spin  { to { transform: rotate(360deg); } }
+@keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+
+.animate-fadeUp          { animation: fadeUp 0.6s ease forwards; }
+.animate-fadeUp-delay-1  { animation: fadeUp 0.6s ease 0.1s both; }
+.animate-fadeUp-delay-2  { animation: fadeUp 0.6s ease 0.2s both; }
+.animate-fadeUp-delay-3  { animation: fadeUp 0.6s ease 0.3s both; }
+
+/* ── Responsive nav ── */
+
+/* Bottom nav: visible only on small screens */
+.bottom-nav {
+  display: flex;
 }
 
-.animate-fadeUp { animation: fadeUp 0.6s ease forwards; }
-.animate-fadeUp-delay-1 { animation: fadeUp 0.6s ease 0.1s both; }
-.animate-fadeUp-delay-2 { animation: fadeUp 0.6s ease 0.2s both; }
-.animate-fadeUp-delay-3 { animation: fadeUp 0.6s ease 0.3s both; }
+/* Top tabs: hidden on small screens */
+.top-tabs {
+  display: none;
+}
+
+/* On large screens (768px+): flip them */
+@media (min-width: 768px) {
+  .bottom-nav {
+    display: none !important;
+  }
+  .top-tabs {
+    display: flex;
+  }
+}

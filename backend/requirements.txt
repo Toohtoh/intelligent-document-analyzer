@@ -16,3 +16,4 @@ opencensus-ext-azure==1.1.13
 aiohttp==3.10.5
 PyJWT[crypto]==2.8.0
 opencensus-ext-azure
+python-docx

@@ -5,7 +5,6 @@ const API_BASE_URL = process.env.REACT_APP_API_URL ||
 
 const AUTH0_AUDIENCE = "https://docanalyzer-api";
 
-// Hook-based API — use this inside React components
 export function useApi() {
   const { getAccessTokenSilently } = useAuth0();
 
@@ -73,5 +72,31 @@ export function useApi() {
     return response.json();
   };
 
-  return { uploadAndAnalyze, listDocuments, getDocument, deleteDocument, askQuestion };
+  const regenerateSummary = async (documentId, originalSummary, ocrText, style) => {
+    const token = await getToken();
+    const response = await fetch(`${API_BASE_URL}/regenerate-summary`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        document_id: documentId,
+        original_summary: originalSummary,
+        ocr_text: ocrText,
+        style,
+      }),
+    });
+    if (!response.ok) throw new Error("Regeneration failed");
+    return response.json();
+  };
+
+  return {
+    uploadAndAnalyze,
+    listDocuments,
+    getDocument,
+    deleteDocument,
+    askQuestion,
+    regenerateSummary,
+  };
 }

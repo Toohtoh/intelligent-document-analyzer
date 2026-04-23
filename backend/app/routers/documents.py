@@ -18,6 +18,7 @@ ALLOWED_CONTENT_TYPES = [
     "image/png",
     "image/tiff",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
 ]
 
 MAX_FILE_SIZE = 10 * 1024 * 1024
@@ -27,6 +28,13 @@ class QuestionRequest(BaseModel):
     document_id: str
     text: str
     question: str
+
+
+class RegenerateSummaryRequest(BaseModel):
+    document_id: str
+    original_summary: str
+    ocr_text: str
+    style: str  # bullet, short, detailed, formal, simple
 
 
 def sanitize_filename(filename: str) -> str:
@@ -198,6 +206,38 @@ async def ask_question(
     }
 
 
+@router.post("/regenerate-summary")
+async def regenerate_summary(
+    request: RegenerateSummaryRequest,
+    token: dict = Depends(verify_token),
+):
+    style_prompts = {
+        "bullet":   "Rewrite the summary as a concise bullet-point list. Use • for each point. No intro sentence.",
+        "short":    "Rewrite the summary in 2-3 sentences maximum. Be extremely concise.",
+        "detailed": "Rewrite the summary in detail, covering all key aspects, context, and implications.",
+        "formal":   "Rewrite the summary in a formal, professional tone suitable for a business report.",
+        "simple":   "Rewrite the summary using simple, everyday language as if explaining to a non-expert.",
+    }
+
+    style = request.style if request.style in style_prompts else "short"
+    prompt = (
+        f"{style_prompts[style]}\n\n"
+        f"Original summary:\n{request.original_summary}\n\n"
+        f"Document excerpt:\n{request.ocr_text[:2000]}"
+    )
+
+    try:
+        ai_service = AIService()
+        new_summary = await ai_service.generate_custom_summary(prompt)
+        return {
+            "document_id": request.document_id,
+            "style": style,
+            "summary": new_summary,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Regeneration failed: {str(e)}")
+
+
 @router.post("/upload", response_model=DocumentResponse)
 async def upload_document(
     file: UploadFile = File(...),
@@ -234,6 +274,7 @@ async def upload_document(
         uploaded_at=datetime.utcnow(),
         message=f"File '{clean_filename}' uploaded successfully.",
     )
+
 
 @router.get("/share/{document_id}")
 async def get_shared_document(document_id: str):

@@ -1,6 +1,7 @@
 from azure.ai.formrecognizer.aio import DocumentAnalysisClient
 from azure.identity.aio import ManagedIdentityCredential
 from app.config import get_settings
+import io
 
 settings = get_settings()
 
@@ -10,6 +11,15 @@ class OCRService:
         self.endpoint = settings.AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT
 
     async def extract_text(self, file_bytes: bytes, content_type: str) -> dict:
+        # ── DOCX — extract directly with python-docx ──────────────────────────
+        if content_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            return self._extract_docx(file_bytes)
+
+        # ── TXT — read directly ───────────────────────────────────────────────
+        if content_type == "text/plain":
+            return self._extract_txt(file_bytes)
+
+        # ── PDF + Images — Azure Document Intelligence ────────────────────────
         if settings.AZURE_DOCUMENT_INTELLIGENCE_KEY:
             from azure.core.credentials import AzureKeyCredential
             credential = AzureKeyCredential(settings.AZURE_DOCUMENT_INTELLIGENCE_KEY)
@@ -36,7 +46,50 @@ class OCRService:
                         document=file_bytes,
                     )
                     result = await poller.result()
+
         return self._parse_result(result)
+
+    def _extract_docx(self, file_bytes: bytes) -> dict:
+        """Extract text from DOCX using python-docx."""
+        try:
+            from docx import Document
+            doc = Document(io.BytesIO(file_bytes))
+            paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+            full_text = "\n".join(paragraphs)
+            return {
+                "full_text": full_text,
+                "pages": [{"page_number": 1, "lines": paragraphs}],
+                "page_count": 1,
+                "tables": [],
+                "key_value_pairs": [],
+                "word_count": len(full_text.split()) if full_text else 0,
+            }
+        except Exception as e:
+            return {
+                "full_text": f"DOCX extraction failed: {str(e)}",
+                "pages": [], "page_count": 0,
+                "tables": [], "key_value_pairs": [], "word_count": 0,
+            }
+
+    def _extract_txt(self, file_bytes: bytes) -> dict:
+        """Extract text from TXT file."""
+        try:
+            full_text = file_bytes.decode("utf-8", errors="ignore")
+            lines = [l for l in full_text.splitlines() if l.strip()]
+            return {
+                "full_text": full_text,
+                "pages": [{"page_number": 1, "lines": lines}],
+                "page_count": 1,
+                "tables": [],
+                "key_value_pairs": [],
+                "word_count": len(full_text.split()) if full_text else 0,
+            }
+        except Exception as e:
+            return {
+                "full_text": f"TXT extraction failed: {str(e)}",
+                "pages": [], "page_count": 0,
+                "tables": [], "key_value_pairs": [], "word_count": 0,
+            }
 
     def _parse_result(self, result) -> dict:
         pages_text = []

@@ -1,3 +1,5 @@
+// DocumentList.jsx
+
 const t = {
   fr: {
     count_single: "document analysé",
@@ -22,6 +24,33 @@ const t = {
   },
 };
 
+const IconFileEmpty = () => (
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--text-muted)" }}>
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="9" y1="13" x2="15" y2="13"/>
+    <line x1="9" y1="17" x2="11" y2="17"/>
+  </svg>
+);
+
+const IconFile = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--indigo)" }}>
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="9" y1="13" x2="15" y2="13"/>
+    <line x1="9" y1="17" x2="11" y2="17"/>
+  </svg>
+);
+
+const IconTrash = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6"/>
+    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+    <path d="M10 11v6"/><path d="M14 11v6"/>
+    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+  </svg>
+);
+
 export default function DocumentList({ documents, onSelect, onDelete, lang = "fr" }) {
   const text = t[lang] || t["fr"];
 
@@ -32,7 +61,9 @@ export default function DocumentList({ documents, onSelect, onDelete, lang = "fr
         background: "var(--navy-card)", border: "1px solid var(--navy-border)",
         borderRadius: "20px",
       }}>
-        <div style={{ fontSize: "48px", marginBottom: "16px" }}>📭</div>
+        <div style={{ marginBottom: "16px", display: "flex", justifyContent: "center" }}>
+          <IconFileEmpty />
+        </div>
         <p style={{ fontFamily: "var(--font-display)", fontSize: "18px", fontWeight: "700", color: "var(--text-primary)", marginBottom: "8px" }}>
           {text.empty_title}
         </p>
@@ -70,8 +101,10 @@ export default function DocumentList({ documents, onSelect, onDelete, lang = "fr
               background: "linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.15))",
               border: "1px solid rgba(99,102,241,0.15)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "18px", flexShrink: 0,
-            }}>📄</div>
+              flexShrink: 0,
+            }}>
+              <IconFile />
+            </div>
             <div>
               <p style={{ fontWeight: "600", color: "var(--text-primary)", fontSize: "14px", marginBottom: "3px" }}>
                 {doc.original_filename || doc.filename}
@@ -83,12 +116,14 @@ export default function DocumentList({ documents, onSelect, onDelete, lang = "fr
               </p>
             </div>
           </div>
+
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <span style={{
               background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)",
               color: "var(--green)", borderRadius: "20px",
               padding: "3px 12px", fontSize: "12px", fontWeight: "600", whiteSpace: "nowrap",
             }}>✓ {doc.status}</span>
+
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -102,7 +137,7 @@ export default function DocumentList({ documents, onSelect, onDelete, lang = "fr
                 background: "rgba(244,63,94,0.06)",
                 color: "#F43F5E", cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "14px", transition: "all 0.2s",
+                transition: "all 0.2s",
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.background = "rgba(244,63,94,0.15)";
@@ -112,7 +147,9 @@ export default function DocumentList({ documents, onSelect, onDelete, lang = "fr
                 e.currentTarget.style.background = "rgba(244,63,94,0.06)";
                 e.currentTarget.style.borderColor = "rgba(244,63,94,0.15)";
               }}
-            >🗑️</button>
+            >
+              <IconTrash />
+            </button>
           </div>
         </div>
       ))}
