@@ -76,23 +76,64 @@ body {
 .animate-fadeUp-delay-3  { animation: fadeUp 0.6s ease 0.3s both; }
 
 /* ── Responsive nav ── */
+.bottom-nav { display: flex; }
+.top-tabs   { display: none; }
 
-/* Bottom nav: visible only on small screens */
-.bottom-nav {
-  display: flex;
-}
-
-/* Top tabs: hidden on small screens */
-.top-tabs {
-  display: none;
-}
-
-/* On large screens (768px+): flip them */
 @media (min-width: 768px) {
-  .bottom-nav {
+  .bottom-nav { display: none !important; }
+  .top-tabs   { display: flex; }
+}
+
+/* ── Mobile fixes ── */
+@media (max-width: 767px) {
+
+  /* Stats: 2x2 grid */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Footer: single column */
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+
+  /* Hide username text in navbar */
+  .nav-username {
     display: none !important;
   }
-  .top-tabs {
-    display: flex;
+
+  /* Hide tagline under logo */
+  .nav-tagline {
+    display: none !important;
+  }
+
+  /* UploadZone: reduce padding on mobile */
+  .upload-zone {
+    padding: 40px 20px !important;
+  }
+
+  /* DocumentList: stack filename + actions */
+  .doc-list-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .doc-list-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* ResultCard buttons: wrap properly */
+  .result-actions {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  /* Hero padding */
+  .hero-section {
+    padding-top: 40px !important;
+    padding-bottom: 24px !important;
   }
 }

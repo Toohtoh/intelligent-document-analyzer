@@ -54,7 +54,6 @@ const translations = {
   },
 };
 
-// ─── SVG Icons ────────────────────────────────────────────────────────────────
 const IconUpload = ({ active }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.5" : "1.8"} strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -212,7 +211,7 @@ export default function Home() {
         <div style={{ position: "fixed", inset: 0, zIndex: 0, backgroundImage: `radial-gradient(circle at 20% 20%, rgba(99,102,241,0.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(6,182,212,0.06) 0%, transparent 50%)`, pointerEvents: "none" }} />
       )}
 
-      {/* ── TOP NAVBAR — logo + lang + toggle + user only ── */}
+      {/* TOP NAVBAR */}
       <nav style={{
         position: "sticky", top: 0, zIndex: 100,
         background: isDark ? "rgba(10,15,30,0.95)" : "rgba(255,255,255,0.95)",
@@ -229,11 +228,11 @@ export default function Home() {
           <Logo />
           <div>
             <div style={{ fontFamily: "var(--font-display)", fontWeight: "800", fontSize: "16px", color: "var(--text-primary)", letterSpacing: "-0.01em", lineHeight: "1.1" }}>DocAnalyzer</div>
-            <div style={{ fontSize: "8px", fontWeight: "700", background: "linear-gradient(90deg, var(--indigo), var(--cyan))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: "0.1em" }}>{t.tagline}</div>
+            <div className="nav-tagline" style={{ fontSize: "8px", fontWeight: "700", background: "linear-gradient(90deg, var(--indigo), var(--cyan))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: "0.1em" }}>{t.tagline}</div>
           </div>
         </div>
 
-        {/* Center tabs — visible on large screens only via CSS */}
+        {/* Center tabs */}
         <div className="top-tabs" style={{ gap: "2px" }}>
           {tabs.map(tab => {
             const isActive = activeTab === tab.id;
@@ -256,22 +255,18 @@ export default function Home() {
 
         {/* Right controls */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-
-          {/* Lang */}
           <div style={{ display: "flex", background: isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9", border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0"}`, borderRadius: "8px", padding: "2px", gap: "1px" }}>
             {["fr", "en", "ar"].map(l => (
               <button key={l} onClick={() => setLang(l)} style={{ padding: "5px 9px", borderRadius: "6px", border: "none", cursor: "pointer", fontSize: "11px", fontWeight: "700", fontFamily: "var(--font-body)", textTransform: "uppercase", background: lang === l ? "linear-gradient(135deg, var(--indigo), #4F46E5)" : "transparent", color: lang === l ? "white" : "var(--text-muted)", transition: "all 0.2s" }}>{l}</button>
             ))}
           </div>
 
-          {/* Dark toggle */}
           <button onClick={() => setIsDark(!isDark)} style={{ display: "flex", alignItems: "center", width: "52px", height: "28px", borderRadius: "14px", border: `1.5px solid ${isDark ? "rgba(99,102,241,0.4)" : "#CBD5E1"}`, background: isDark ? "linear-gradient(135deg, #1E1B4B, #1E3A5F)" : "linear-gradient(135deg, #FEF9C3, #FEF3C7)", cursor: "pointer", position: "relative", transition: "all 0.4s", padding: 0, overflow: "hidden", flexShrink: 0 }}>
             <div style={{ position: "absolute", left: isDark ? "26px" : "2px", top: "2px", width: "22px", height: "22px", borderRadius: "50%", background: isDark ? "linear-gradient(135deg, #C7D2FE, #818CF8)" : "linear-gradient(135deg, #FCD34D, #F59E0B)", transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontSize: "10px", lineHeight: 1 }}>{isDark ? "☾" : "☼"}</span>
             </div>
           </button>
 
-          {/* User */}
           <div id="user-menu-container" style={{ position: "relative" }}>
             <button onClick={() => setShowUserMenu(!showUserMenu)} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px 10px 4px 4px", background: isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9", border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0"}`, borderRadius: "10px", cursor: "pointer", transition: "all 0.2s" }}
               onMouseEnter={e => e.currentTarget.style.borderColor = "var(--indigo)"}
@@ -280,7 +275,7 @@ export default function Home() {
                 ? <img src={user.picture} alt="" style={{ width: "26px", height: "26px", borderRadius: "50%", border: "2px solid var(--indigo)" }} />
                 : <div style={{ width: "26px", height: "26px", borderRadius: "50%", background: "linear-gradient(135deg, var(--indigo), var(--cyan))", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", fontWeight: "700", color: "white" }}>{getUserInitials()}</div>
               }
-              <span style={{ fontSize: "13px", fontWeight: "500", color: "var(--text-primary)", maxWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name?.split(" ")[0] || user?.email}</span>
+              <span className="nav-username" style={{ fontSize: "13px", fontWeight: "500", color: "var(--text-primary)", maxWidth: "100px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name?.split(" ")[0] || user?.email}</span>
               <IconChevron open={showUserMenu} />
             </button>
 
@@ -302,13 +297,13 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* ── PAGE BODY ── */}
+      {/* PAGE BODY */}
       <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
 
         {/* Hero */}
         {activeTab === "upload" && (
           <div style={{ width: "100%", background: "var(--navy)" }}>
-            <div style={{ textAlign: "center", padding: `72px ${sidePad} 48px`, maxWidth: maxW, margin: "0 auto" }}>
+            <div className="hero-section" style={{ textAlign: "center", padding: `72px ${sidePad} 48px`, maxWidth: maxW, margin: "0 auto" }}>
               <div className="animate-fadeUp" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: "20px", padding: "6px 16px", marginBottom: "32px", fontSize: "13px", color: "var(--indigo)" }}>
                 <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "var(--green)", display: "inline-block", animation: "pulse-ring 2s infinite" }} />
                 {t.hero_badge}
@@ -323,7 +318,7 @@ export default function Home() {
                 {t.hero_sub}
               </p>
 
-              <div className="animate-fadeUp-delay-3" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", background: "var(--navy-card)", border: "1px solid var(--navy-border)", borderRadius: "16px", marginBottom: "48px", overflow: "hidden" }}>
+              <div className="animate-fadeUp-delay-3 stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", background: "var(--navy-card)", border: "1px solid var(--navy-border)", borderRadius: "16px", marginBottom: "48px", overflow: "hidden" }}>
                 {[
                   { value: documents.length || "0", label: t.stat_docs,   color: "var(--indigo)" },
                   { value: "GPT-4o",                label: t.stat_model,  color: "var(--cyan)"   },
@@ -375,7 +370,7 @@ export default function Home() {
         {/* Footer */}
         <footer style={{ width: "100%", borderTop: "1px solid var(--navy-border)", background: "var(--navy-soft)", padding: `48px ${sidePad} 32px`, transition: "all 0.3s" }}>
           <div style={{ maxWidth: maxW, margin: "0 auto" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "40px", marginBottom: "40px" }}>
+            <div className="footer-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "40px", marginBottom: "40px" }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
                   <Logo />
@@ -402,7 +397,7 @@ export default function Home() {
         </footer>
       </div>
 
-      {/* ── BOTTOM NAV BAR ── */}
+      {/* BOTTOM NAV */}
       <div className="bottom-nav" style={{
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 100,
         background: isDark ? "rgba(10,15,30,0.97)" : "rgba(255,255,255,0.97)",
@@ -416,49 +411,24 @@ export default function Home() {
         {tabs.map(tab => {
           const isActive = activeTab === tab.id;
           return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                flex: 1,
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                gap: "4px",
-                height: "100%",
-                border: "none", background: "transparent", cursor: "pointer",
-                color: isActive ? "var(--indigo)" : "var(--text-muted)",
-                transition: "all 0.2s",
-                position: "relative",
-              }}
-            >
-              {/* Active indicator pill at top */}
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
+              flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              gap: "4px", height: "100%", border: "none", background: "transparent", cursor: "pointer",
+              color: isActive ? "var(--indigo)" : "var(--text-muted)", transition: "all 0.2s", position: "relative",
+            }}>
               {isActive && (
-                <div style={{
-                  position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
-                  width: "32px", height: "3px", borderRadius: "0 0 4px 4px",
-                  background: "linear-gradient(90deg, var(--indigo), var(--cyan))",
-                }} />
+                <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: "32px", height: "3px", borderRadius: "0 0 4px 4px", background: "linear-gradient(90deg, var(--indigo), var(--cyan))" }} />
               )}
-              <div style={{
-                width: "36px", height: "36px", borderRadius: "10px",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                background: isActive ? "rgba(99,102,241,0.12)" : "transparent",
-                transition: "all 0.2s",
-              }}>
+              <div style={{ width: "36px", height: "36px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", background: isActive ? "rgba(99,102,241,0.12)" : "transparent", transition: "all 0.2s" }}>
                 {tab.icon(isActive)}
               </div>
-              <span style={{
-                fontSize: "10px", fontWeight: isActive ? "700" : "400",
-                fontFamily: "var(--font-body)", lineHeight: 1,
-                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                maxWidth: "64px",
-              }}>
+              <span style={{ fontSize: "10px", fontWeight: isActive ? "700" : "400", fontFamily: "var(--font-body)", lineHeight: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "64px" }}>
                 {tab.id === "history" ? `${t.history} (${documents.length})` : tab.label}
               </span>
             </button>
           );
         })}
       </div>
-
     </div>
   );
 }
