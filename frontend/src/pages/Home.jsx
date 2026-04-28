@@ -148,16 +148,14 @@ function ResultTabContent({ result, setResult, isDark, lang, getToken }) {
   const [showRegen, setShowRegen] = useState(false);
 
   // ✅ FIXED: was ai_analysis (wrong), now ai_result (correct)
-  const handleNewSummary = (s) => {
-    setResult(prev => ({
-      ...prev,
-      ai_result: {
-        ...prev.ai_result,
-        summary: s,
-      },
-    }));
-    setShowRegen(false);
-  };
+ const handleNewSummary = (s) => {
+  console.log("NEW SUMMARY:", s); // add this
+  setResult(prev => ({
+    ...prev,
+    ai_result: { ...prev.ai_result, summary: s },
+  }));
+  setShowRegen(false);
+};
 
   if (!result) return (
     <div style={{ textAlign: "center", padding: "80px 32px", background: "var(--navy-card)", border: "1px solid var(--navy-border)", borderRadius: "20px" }}>
