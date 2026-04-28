@@ -146,7 +146,19 @@ function RegenerateSummaryPanel({ result, lang, isDark, onNewSummary, getToken }
 function ResultTabContent({ result, setResult, isDark, lang, getToken }) {
   const t = translations[lang];
   const [showRegen, setShowRegen] = useState(false);
-  const handleNewSummary = (s) => { setResult(prev => ({ ...prev, ai_analysis: { ...prev.ai_analysis, summary: s } })); setShowRegen(false); };
+
+  // ✅ FIXED: was ai_analysis (wrong), now ai_result (correct)
+  const handleNewSummary = (s) => {
+    setResult(prev => ({
+      ...prev,
+      ai_result: {
+        ...prev.ai_result,
+        summary: s,
+      },
+    }));
+    setShowRegen(false);
+  };
+
   if (!result) return (
     <div style={{ textAlign: "center", padding: "80px 32px", background: "var(--navy-card)", border: "1px solid var(--navy-border)", borderRadius: "20px" }}>
       <div style={{ marginBottom: "16px", display: "flex", justifyContent: "center" }}><IconEmpty /></div>
