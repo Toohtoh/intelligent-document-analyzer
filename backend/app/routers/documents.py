@@ -30,11 +30,6 @@ class QuestionRequest(BaseModel):
     question: str
 
 
-class RegenerateSummaryRequest(BaseModel):
-    document_id: str
-    style: str
-
-
 def sanitize_filename(filename: str) -> str:
     filename = filename.strip()
     filename = re.sub(r'[^\w\-_\.]', '_', filename)
@@ -192,52 +187,6 @@ async def ask_question(
         raise HTTPException(status_code=500, detail=f"Failed to answer: {str(e)}")
 
     return {"document_id": request.document_id, "question": request.question, "answer": answer}
-
-
-@router.post("/regenerate-summary")
-async def regenerate_summary(
-    request: RegenerateSummaryRequest,
-    token: dict = Depends(verify_token),
-):
-    user_id = token["sub"]
-
-    style_prompts = {
-        "bullet":   "Rewrite the summary as a concise bullet-point list. Use • for each point. No intro sentence.",
-        "short":    "Rewrite the summary in 2-3 sentences maximum. Be extremely concise.",
-        "detailed": "Rewrite the summary in detail, covering all key aspects, context, and implications.",
-        "formal":   "Rewrite the summary in a formal, professional tone suitable for a business report.",
-        "simple":   "Rewrite the summary using simple, everyday language as if explaining to a non-expert.",
-    }
-
-    # Fetch document from Cosmos — no need for frontend to send ocr_text/summary
-    try:
-        cosmos_service = CosmosService()
-        document = await cosmos_service.get_document(request.document_id, user_id=user_id)
-    except Exception as e:
-        raise HTTPException(status_code=404, detail=f"Document not found: {str(e)}")
-
-    if document.get("userId") != user_id:
-        raise HTTPException(status_code=403, detail="Access denied.")
-
-    ocr_text = document.get("ocr_result", {}).get("full_text", "")
-    original_summary = document.get("ai_result", {}).get("summary", "")
-
-    if not ocr_text and not original_summary:
-        raise HTTPException(status_code=400, detail="Document has no text to summarize.")
-
-    style = request.style if request.style in style_prompts else "short"
-    prompt = (
-        f"{style_prompts[style]}\n\n"
-        f"Original summary:\n{original_summary}\n\n"
-        f"Document excerpt:\n{ocr_text[:2000]}"
-    )
-
-    try:
-        ai_service = AIService()
-        new_summary = await ai_service.generate_custom_summary(prompt)
-        return {"document_id": request.document_id, "style": style, "summary": new_summary}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Regeneration failed: {str(e)}")
 
 
 @router.post("/upload", response_model=DocumentResponse)
