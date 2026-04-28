@@ -17,10 +17,7 @@ const translations = {
     footer_desc: "Solution d'analyse documentaire intelligente propulsée par Azure AI. Développé dans le cadre d'un stage chez Eurastech.",
     nav_title: "Navigation", tech_title: "Technologies", azure_title: "Azure",
     footer_copy: "© 2026 DocAnalyzer — Stage ISGI × Eurastech", footer_power: "Powered by Microsoft Azure",
-    logout: "Déconnexion", greeting: "Bonjour",
-    regen_title: "Régénérer le résumé", regen_bullet: "En points clés", regen_short: "Résumé court",
-    regen_detailed: "Résumé détaillé", regen_formal: "Ton formel", regen_simple: "Langage simple",
-    regen_btn: "Régénérer", regen_generating: "Génération...", dashboard: "Dashboard",
+    logout: "Déconnexion", greeting: "Bonjour", dashboard: "Dashboard",
   },
   en: {
     tagline: "BY EURASTECH", upload: "Upload", result: "Result", history: "History",
@@ -32,10 +29,7 @@ const translations = {
     footer_desc: "Intelligent document analysis solution powered by Azure AI. Developed as part of an internship at Eurastech.",
     nav_title: "Navigation", tech_title: "Technologies", azure_title: "Azure",
     footer_copy: "© 2026 DocAnalyzer — ISGI Internship × Eurastech", footer_power: "Powered by Microsoft Azure",
-    logout: "Logout", greeting: "Hello",
-    regen_title: "Regenerate Summary", regen_bullet: "Bullet points", regen_short: "Short summary",
-    regen_detailed: "Detailed summary", regen_formal: "Formal tone", regen_simple: "Simple language",
-    regen_btn: "Regenerate", regen_generating: "Generating...", dashboard: "Dashboard",
+    logout: "Logout", greeting: "Hello", dashboard: "Dashboard",
   },
   ar: {
     tagline: "بواسطة يوراستك", upload: "رفع", result: "النتيجة", history: "السجل",
@@ -47,10 +41,7 @@ const translations = {
     footer_desc: "حل ذكي لتحليل المستندات مدعوم بـ Azure AI.",
     nav_title: "التنقل", tech_title: "التقنيات", azure_title: "Azure",
     footer_copy: "© 2026 DocAnalyzer — تدريب ISGI × يوراستك", footer_power: "مدعوم بـ Microsoft Azure",
-    logout: "تسجيل الخروج", greeting: "مرحباً",
-    regen_title: "إعادة توليد", regen_bullet: "نقاط", regen_short: "قصير",
-    regen_detailed: "مفصل", regen_formal: "رسمي", regen_simple: "بسيط",
-    regen_btn: "توليد", regen_generating: "جارٍ...", dashboard: "لوحة",
+    logout: "تسجيل الخروج", greeting: "مرحباً", dashboard: "لوحة",
   },
 };
 
@@ -82,7 +73,6 @@ const IconLogout = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill="
 const IconChevron = ({ open }) => (<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><polyline points="6 9 12 15 18 9"/></svg>);
 const IconError = () => (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>);
 const IconEmpty = () => (<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--text-muted)" }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="11" y2="17"/></svg>);
-const IconSparkle = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>);
 
 const Logo = () => (
   <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
@@ -97,83 +87,15 @@ const Logo = () => (
   </svg>
 );
 
-function RegenerateSummaryPanel({ result, lang, isDark, onNewSummary, getToken }) {
+function ResultTabContent({ result, isDark, lang }) {
   const t = translations[lang];
-  const isRTL = lang === "ar";
-  const [selectedStyle, setSelectedStyle] = useState("bullet");
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState(null);
-  const styles = [
-    { id: "bullet", label: t.regen_bullet }, { id: "short", label: t.regen_short },
-    { id: "detailed", label: t.regen_detailed }, { id: "formal", label: t.regen_formal },
-    { id: "simple", label: t.regen_simple },
-  ];
-  const handleRegenerate = async () => {
-    if (!result?.document_id) return;
-    setIsGenerating(true); setError(null);
-    try {
-      const token = await getToken();
-      const res = await fetch(
-        `${process.env.REACT_APP_API_URL || "https://app-docanalyzer-25eb89.azurewebsites.net"}/regenerate-summary`,
-        { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ document_id: result.document_id, style: selectedStyle }) }
-      );
-      if (!res.ok) throw new Error("failed");
-      const data = await res.json();
-      const s = data.summary || data.new_summary || "";
-      if (s) onNewSummary(s);
-    } catch { setError("Regeneration failed. Please try again."); }
-    setIsGenerating(false);
-  };
-  return (
-    <div style={{ background: isDark ? "rgba(99,102,241,0.06)" : "rgba(99,102,241,0.04)", border: `1px solid ${isDark ? "rgba(99,102,241,0.2)" : "rgba(99,102,241,0.15)"}`, borderRadius: "16px", padding: "20px 24px", marginTop: "16px", direction: isRTL ? "rtl" : "ltr" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-        <span style={{ color: "var(--indigo)" }}><IconSparkle /></span>
-        <span style={{ fontFamily: "var(--font-display)", fontWeight: "700", fontSize: "14px", color: "var(--indigo)" }}>{t.regen_title}</span>
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
-        {styles.map(s => <button key={s.id} onClick={() => setSelectedStyle(s.id)} style={{ padding: "7px 14px", borderRadius: "10px", border: `1.5px solid ${selectedStyle === s.id ? "var(--indigo)" : isDark ? "rgba(255,255,255,0.1)" : "#CBD5E1"}`, background: selectedStyle === s.id ? "rgba(99,102,241,0.12)" : "transparent", color: selectedStyle === s.id ? "var(--indigo)" : "var(--text-muted)", fontSize: "13px", fontWeight: selectedStyle === s.id ? "600" : "400", fontFamily: "var(--font-body)", cursor: "pointer", transition: "all 0.2s" }}>{s.label}</button>)}
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <button onClick={handleRegenerate} disabled={isGenerating} style={{ padding: "10px 24px", background: isGenerating ? "rgba(99,102,241,0.3)" : "linear-gradient(135deg, var(--indigo), #4F46E5)", border: "none", borderRadius: "10px", color: "white", cursor: isGenerating ? "not-allowed" : "pointer", fontSize: "13px", fontWeight: "600", fontFamily: "var(--font-body)", display: "flex", alignItems: "center", gap: "8px", boxShadow: isGenerating ? "none" : "0 4px 12px rgba(99,102,241,0.3)" }}>
-          {isGenerating ? <><span style={{ width: "12px", height: "12px", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "white", borderRadius: "50%", animation: "spin 0.7s linear infinite", display: "inline-block" }} />{t.regen_generating}</> : <><IconSparkle />{t.regen_btn}</>}
-        </button>
-        {error && <span style={{ fontSize: "12px", color: "#F43F5E" }}>{error}</span>}
-      </div>
-    </div>
-  );
-}
-
-function ResultTabContent({ result, setResult, isDark, lang, getToken }) {
-  const t = translations[lang];
-  const [showRegen, setShowRegen] = useState(false);
-
-  // ✅ FIXED: was ai_analysis (wrong), now ai_result (correct)
- const handleNewSummary = (s) => {
-  console.log("NEW SUMMARY:", s); // add this
-  setResult(prev => ({
-    ...prev,
-    ai_result: { ...prev.ai_result, summary: s },
-  }));
-  setShowRegen(false);
-};
-
   if (!result) return (
     <div style={{ textAlign: "center", padding: "80px 32px", background: "var(--navy-card)", border: "1px solid var(--navy-border)", borderRadius: "20px" }}>
       <div style={{ marginBottom: "16px", display: "flex", justifyContent: "center" }}><IconEmpty /></div>
       <p style={{ color: "var(--text-muted)", fontSize: "16px" }}>{t.no_result}</p>
     </div>
   );
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "12px" }}>
-        <button onClick={() => setShowRegen(!showRegen)} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px", borderRadius: "10px", border: `1.5px solid ${showRegen ? "var(--indigo)" : isDark ? "rgba(255,255,255,0.12)" : "#CBD5E1"}`, background: showRegen ? "rgba(99,102,241,0.1)" : isDark ? "rgba(255,255,255,0.04)" : "#F8FAFC", color: showRegen ? "var(--indigo)" : "var(--text-muted)", fontSize: "13px", fontWeight: "600", fontFamily: "var(--font-body)", cursor: "pointer", transition: "all 0.2s" }}>
-          <IconSparkle /> {t.regen_title}
-        </button>
-      </div>
-      {showRegen && <RegenerateSummaryPanel result={result} lang={lang} isDark={isDark} onNewSummary={handleNewSummary} getToken={getToken} />}
-      <ResultCard result={result} isDark={isDark} lang={lang} />
-    </div>
-  );
+  return <ResultCard result={result} isDark={isDark} lang={lang} />;
 }
 
 export default function Home() {
@@ -221,7 +143,6 @@ export default function Home() {
         <div style={{ position: "fixed", inset: 0, zIndex: 0, backgroundImage: `radial-gradient(circle at 20% 20%, rgba(99,102,241,0.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(6,182,212,0.06) 0%, transparent 50%)`, pointerEvents: "none" }} />
       )}
 
-      {/* TOP NAVBAR */}
       <nav style={{
         position: "sticky", top: 0, zIndex: 100,
         background: isDark ? "rgba(10,15,30,0.95)" : "rgba(255,255,255,0.95)",
@@ -232,8 +153,6 @@ export default function Home() {
         padding: `0 ${sidePad}`,
         transition: "all 0.3s",
       }}>
-
-        {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
           <Logo />
           <div>
@@ -242,7 +161,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Center tabs */}
         <div className="top-tabs" style={{ gap: "2px" }}>
           {tabs.map(tab => {
             const isActive = activeTab === tab.id;
@@ -263,7 +181,6 @@ export default function Home() {
           })}
         </div>
 
-        {/* Right controls */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <div style={{ display: "flex", background: isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9", border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0"}`, borderRadius: "8px", padding: "2px", gap: "1px" }}>
             {["fr", "en", "ar"].map(l => (
@@ -307,10 +224,8 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* PAGE BODY */}
       <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
 
-        {/* Hero */}
         {activeTab === "upload" && (
           <div style={{ width: "100%", background: "var(--navy)" }}>
             <div className="hero-section" style={{ textAlign: "center", padding: `72px ${sidePad} 48px`, maxWidth: maxW, margin: "0 auto" }}>
@@ -318,16 +233,13 @@ export default function Home() {
                 <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "var(--green)", display: "inline-block", animation: "pulse-ring 2s infinite" }} />
                 {t.hero_badge}
               </div>
-
               <h1 className="animate-fadeUp-delay-1" style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 4.5vw, 56px)", fontWeight: "800", lineHeight: "1.1", letterSpacing: "-0.02em", marginBottom: "20px", color: "var(--text-primary)" }}>
                 {t.hero_title_1}{" "}
                 <span style={{ background: "linear-gradient(90deg, var(--indigo), var(--cyan))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{t.hero_title_2}</span>
               </h1>
-
               <p className="animate-fadeUp-delay-2" style={{ fontSize: "17px", color: "var(--text-soft)", lineHeight: "1.7", maxWidth: "560px", margin: "0 auto 48px" }}>
                 {t.hero_sub}
               </p>
-
               <div className="animate-fadeUp-delay-3 stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", background: "var(--navy-card)", border: "1px solid var(--navy-border)", borderRadius: "16px", marginBottom: "48px", overflow: "hidden" }}>
                 {[
                   { value: documents.length || "0", label: t.stat_docs,   color: "var(--indigo)" },
@@ -345,7 +257,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Content */}
         <div style={{ width: "100%", background: "var(--navy)" }}>
           <div style={{ maxWidth: maxW, margin: "0 auto", padding: activeTab === "upload" ? `0 ${sidePad} 80px` : `40px ${sidePad} 80px` }}>
 
@@ -362,7 +273,7 @@ export default function Home() {
 
             {activeTab === "result" && (
               result
-                ? <ResultTabContent result={result} setResult={setResult} isDark={isDark} lang={lang} getToken={getAccessTokenSilently} />
+                ? <ResultTabContent result={result} isDark={isDark} lang={lang} />
                 : (
                   <div style={{ textAlign: "center", padding: "80px 32px", background: "var(--navy-card)", border: "1px solid var(--navy-border)", borderRadius: "20px" }}>
                     <div style={{ marginBottom: "16px", display: "flex", justifyContent: "center" }}><IconEmpty /></div>
@@ -377,7 +288,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Footer */}
         <footer style={{ width: "100%", borderTop: "1px solid var(--navy-border)", background: "var(--navy-soft)", padding: `48px ${sidePad} 32px`, transition: "all 0.3s" }}>
           <div style={{ maxWidth: maxW, margin: "0 auto" }}>
             <div className="footer-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "40px", marginBottom: "40px" }}>
@@ -407,7 +317,6 @@ export default function Home() {
         </footer>
       </div>
 
-      {/* BOTTOM NAV */}
       <div className="bottom-nav" style={{
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 100,
         background: isDark ? "rgba(10,15,30,0.97)" : "rgba(255,255,255,0.97)",

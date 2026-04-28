@@ -75,7 +75,6 @@ const t = {
   },
 };
 
-// ─── SVG Icons ────────────────────────────────────────────────────────────────
 const IconDownload = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -156,7 +155,6 @@ const IconChevron = ({ open }) => (
   </svg>
 );
 
-// Doc type icons — SVG only, no emoji
 const DocTypeIcon = ({ type }) => {
   const icons = {
     invoice: (
@@ -397,7 +395,6 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
   const dtype = result.ai_result?.document_type;
   const dtypeCfg = dtype ? (docTypeConfig[dtype] || docTypeConfig["unknown"]) : null;
 
-  // Shared button base
   const btnBase = {
     display: "flex", alignItems: "center", gap: "6px",
     padding: "8px 14px", borderRadius: "10px",
@@ -452,7 +449,6 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
             <IconCheck /> {text.completed}
           </span>
 
-          {/* Action buttons */}
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <button onClick={handleDownloadPDF} style={{
               ...btnBase, border: "none",
@@ -461,7 +457,6 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
             }}>
               <IconDownload /> {text.download_pdf}
             </button>
-
             <button onClick={handleDownloadDOCX} style={{
               ...btnBase,
               border: "1.5px solid rgba(99,102,241,0.3)",
@@ -469,7 +464,6 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
             }}>
               <IconDocx /> {text.download_docx}
             </button>
-
             <button onClick={handleDownloadPNG} style={{
               ...btnBase,
               border: "1.5px solid rgba(6,182,212,0.3)",
@@ -477,7 +471,6 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
             }}>
               <IconImage /> {text.download_png}
             </button>
-
             <button onClick={handleShare} style={{
               ...btnBase,
               border: "1.5px solid rgba(16,185,129,0.3)",
