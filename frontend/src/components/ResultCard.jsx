@@ -10,7 +10,6 @@ const t = {
     completed: "Complété",
     download_pdf: "PDF",
     download_docx: "DOCX",
-    download_png: "PNG",
     share: "Partager",
     copied: "Copié !",
     summary_title: "Résumé IA — GPT-4o",
@@ -33,7 +32,6 @@ const t = {
     completed: "Completed",
     download_pdf: "PDF",
     download_docx: "DOCX",
-    download_png: "PNG",
     share: "Share",
     copied: "Copied!",
     summary_title: "AI Summary — GPT-4o",
@@ -56,7 +54,6 @@ const t = {
     completed: "مكتمل",
     download_pdf: "PDF",
     download_docx: "DOCX",
-    download_png: "PNG",
     share: "مشاركة",
     copied: "تم النسخ!",
     summary_title: "ملخص الذكاء الاصطناعي — GPT-4o",
@@ -85,13 +82,6 @@ const IconDocx = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
     <polyline points="14 2 14 8 20 8"/>
-  </svg>
-);
-const IconImage = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="18" height="18" rx="2"/>
-    <circle cx="8.5" cy="8.5" r="1.5"/>
-    <polyline points="21 15 16 10 5 21"/>
   </svg>
 );
 const IconShare = () => (
@@ -335,40 +325,6 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
     URL.revokeObjectURL(url);
   };
 
-  const handleDownloadPNG = () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 1200; canvas.height = 630;
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#0A0F1E";
-    ctx.fillRect(0, 0, 1200, 630);
-    const grad = ctx.createLinearGradient(0, 0, 1200, 0);
-    grad.addColorStop(0, "#6366F1"); grad.addColorStop(1, "#06B6D4");
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, 1200, 6);
-    ctx.fillStyle = "#F8FAFC"; ctx.font = "bold 36px sans-serif"; ctx.fillText("DocAnalyzer", 60, 80);
-    ctx.fillStyle = "rgba(99,102,241,0.15)"; ctx.roundRect(60, 100, 280, 32, 16); ctx.fill();
-    ctx.fillStyle = "#818CF8"; ctx.font = "13px sans-serif"; ctx.fillText("Powered by Azure OpenAI GPT-4o", 76, 121);
-    ctx.fillStyle = "#64748B"; ctx.font = "16px sans-serif"; ctx.fillText(result.original_filename, 60, 175);
-    ctx.fillStyle = "#6366F1"; ctx.font = "bold 14px sans-serif"; ctx.fillText(text.summary_title.toUpperCase(), 60, 220);
-    ctx.fillStyle = "#CBD5E1"; ctx.font = "16px sans-serif";
-    const summary = result.ai_result?.summary || "";
-    const words = summary.split(" ");
-    let line = "", y = 248;
-    for (const word of words) {
-      const test = line + word + " ";
-      if (ctx.measureText(test).width > 1080 || y > 480) break;
-      if (ctx.measureText(test).width > 1080) { ctx.fillText(line, 60, y); line = word + " "; y += 26; }
-      else { line = test; }
-    }
-    if (line) ctx.fillText(line, 60, y);
-    ctx.fillStyle = "#334155"; ctx.font = "13px sans-serif"; ctx.fillText(text.report_footer, 60, 600);
-    canvas.toBlob((blob) => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = `rapport_${result.filename || "document"}.png`; a.click();
-      URL.revokeObjectURL(url);
-    });
-  };
-
   const entityColors = {
     organizations: { bg: "rgba(99,102,241,0.1)",  border: "rgba(99,102,241,0.25)", text: "var(--indigo)" },
     people:        { bg: "rgba(168,85,247,0.1)",   border: "rgba(168,85,247,0.25)", text: "#A855F7" },
@@ -463,13 +419,6 @@ export default function ResultCard({ result, isDark, lang = "fr" }) {
               background: "rgba(99,102,241,0.08)", color: "var(--indigo)",
             }}>
               <IconDocx /> {text.download_docx}
-            </button>
-            <button onClick={handleDownloadPNG} style={{
-              ...btnBase,
-              border: "1.5px solid rgba(6,182,212,0.3)",
-              background: "rgba(6,182,212,0.08)", color: "var(--cyan)",
-            }}>
-              <IconImage /> {text.download_png}
             </button>
             <button onClick={handleShare} style={{
               ...btnBase,
