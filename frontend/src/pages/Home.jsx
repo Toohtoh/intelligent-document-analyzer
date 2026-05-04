@@ -115,7 +115,7 @@ export default function Home() {
   const sidePad = "clamp(16px, 4vw, 64px)";
   const maxW = "1280px";
 
-  useEffect(() => { fetchDocuments(); }, []);
+  useEffect(() => { fetchDocuments(); }, [fetchDocuments]);  // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { document.body.classList.toggle("light", !isDark); }, [isDark]);
   useEffect(() => {
     const h = (e) => { if (!e.target.closest("#user-menu-container")) setShowUserMenu(false); };
