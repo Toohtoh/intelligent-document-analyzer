@@ -104,6 +104,7 @@ jobs:
           npm run build
         env:
           REACT_APP_API_URL: https://app-docanalyzer-25eb89.azurewebsites.net/api/v1
+          CI: false
 
       - name: Install Azure CLI
         run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
