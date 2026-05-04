@@ -78,3 +78,118 @@ jobs:
             exit 1
           fi
           echo "App is live and healthy"
+          name: CI/CD - Build, Scan, Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  ACR_LOGIN_SERVER: acrdocanalyzer25eb89.azurecr.io
+  IMAGE_NAME: docanalyzer-backend
+  APP_SERVICE_NAME: app-docanalyzer-25eb89
+  RESOURCE_GROUP: rg-document-analyzer-dev
+
+jobs:
+  build-scan-push:
+    name: Build, Scan and Push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to ACR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} -t $ACR_LOGIN_SERVER/$IMAGE_NAME:latest ./backend
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          format: table
+          exit-code: 0
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+      - name: Push image to ACR
+        run: |
+          docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
+          docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:latest
+
+  deploy:
+    name: Deploy to App Service
+    runs-on: ubuntu-latest
+    needs: build-scan-push
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Trigger App Service webhook
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST "https://${{ secrets.WEBHOOK_URL }}")
+          echo "Webhook status: $STATUS"
+          if [ "$STATUS" != "202" ]; then
+            echo "Deploy webhook failed - status $STATUS"
+            exit 1
+          fi
+          echo "Deploy triggered successfully"
+
+  smoke-test:
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Wait for App Service to be ready
+        run: sleep 40
+
+      - name: Health check
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://app-docanalyzer-25eb89.azurewebsites.net/health)
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "Smoke test failed - /health returned $STATUS"
+            exit 1
+          fi
+          echo "App is live and healthy"
+
+  deploy-frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    needs: smoke-test
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build
+        run: |
+          cd frontend
+          npm run build
+        env:
+          REACT_APP_API_URL: https://app-docanalyzer-25eb89.azurewebsites.net/api/v1
+
+      - name: Install Azure CLI
+        run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+      - name: Deploy to Azure Blob Storage
+        run: |
+          az storage blob upload-batch --account-name stdocanalyzer25eb89 --destination '$web' --source ./frontend/build --overwrite --auth-mode key
+        env:
+          AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
